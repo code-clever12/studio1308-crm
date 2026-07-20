@@ -14,13 +14,13 @@
             <label class="block text-xs text-gray-500 mb-1">{{ __('To') }}</label>
             <input type="date" name="to" value="{{ $to->toDateString() }}" class="rounded-md border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
         </div>
-        <button type="submit" class="px-4 py-2 rounded-md bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-500">
+        <button type="submit" class="btn-primary">
             {{ __('Filter') }}
         </button>
     </form>
 
-    <div class="bg-white shadow-sm rounded-lg overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200">
+    <div class="data-table-wrapper">
+        <table class="data-table min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('Staff') }}</th>

@@ -17,7 +17,7 @@
             <a href="{{ route('admin.appointments.index') }}" class="text-sm text-indigo-600 hover:underline">{{ __('Today') }}</a>
         </form>
 
-        <a href="{{ route('admin.appointments.create') }}" class="inline-flex items-center px-4 py-2 rounded-md bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-500">
+        <a href="{{ route('admin.appointments.create') }}" class="btn-primary">
             {{ __('+ New Booking') }}
         </a>
     </div>

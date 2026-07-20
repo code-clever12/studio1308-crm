@@ -6,13 +6,13 @@
     </x-slot>
 
     <div class="flex justify-end mb-4">
-        <a href="{{ route('admin.services.create') }}" class="inline-flex items-center px-4 py-2 rounded-md bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-500">
+        <a href="{{ route('admin.services.create') }}" class="btn-primary">
             {{ __('+ Add Service') }}
         </a>
     </div>
 
-    <div class="bg-white shadow-sm rounded-lg overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200">
+    <div class="data-table-wrapper">
+        <table class="data-table min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('Name') }}</th>
@@ -36,11 +36,18 @@
                         <td class="px-6 py-4 text-right text-sm space-x-3">
                             <a href="{{ route('admin.services.edit', $service) }}" class="text-indigo-600 hover:text-indigo-800">{{ __('Edit') }}</a>
                             @if ($service->is_active)
-                                <form method="POST" action="{{ route('admin.services.destroy', $service) }}" class="inline" onsubmit="return confirm('{{ __('Deactivate this service?') }}');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-600 hover:text-red-800">{{ __('Deactivate') }}</button>
-                                </form>
+                                <button type="button" x-data x-on:click="$dispatch('open-modal', 'deactivate-service-{{ $service->id }}')" class="text-red-600 hover:text-red-800">
+                                    {{ __('Deactivate') }}
+                                </button>
+
+                                <x-confirm-modal
+                                    id="deactivate-service-{{ $service->id }}"
+                                    :title="__('Deactivate :name?', ['name' => $service->name])"
+                                    :action="route('admin.services.destroy', $service)"
+                                    :confirm-label="__('Deactivate')"
+                                >
+                                    {{ __('Customers will no longer be able to book this service. Existing bookings are unaffected.') }}
+                                </x-confirm-modal>
                             @endif
                         </td>
                     </tr>

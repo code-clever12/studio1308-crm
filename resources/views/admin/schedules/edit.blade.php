@@ -11,7 +11,7 @@
     </x-slot>
 
     <div class="max-w-3xl space-y-6">
-        <div class="bg-white shadow-sm rounded-lg p-6">
+        <div class="card">
             <form method="POST" action="{{ route('admin.schedules.update', $staff) }}" class="space-y-3">
                 @csrf
                 @method('PUT')
@@ -47,13 +47,13 @@
                     </div>
                 @endforeach
 
-                <button type="submit" class="inline-flex items-center px-5 py-2.5 rounded-md bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-500">
+                <button type="submit" class="btn-primary">
                     {{ __('Save Schedule') }}
                 </button>
             </form>
         </div>
 
-        <div class="bg-white shadow-sm rounded-lg p-6">
+        <div class="card">
             <h3 class="text-sm font-semibold text-gray-800 mb-4">{{ __('Days Off') }}</h3>
 
             @if ($staff->daysOff->isEmpty())

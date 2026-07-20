@@ -19,6 +19,10 @@
     --color-pine-800: #1f3d2b;
     --color-pine-700: #2c5744;
     --color-pine-600: #3a6d55;
+    --color-pine-500: #4d8563;
+    --color-pine-400: #6fa382;
+    --color-pine-300: #9dc2a9;
+    --color-pine-200: #c5dbcc;
     --color-pine-100: #e2ece4;
     --color-pine-50: #f0f5f1;
 
@@ -45,4 +49,18 @@
 .font-display {
     font-family: var(--font-display);
     letter-spacing: 0.02em;
+}
+
+@layer components {
+    .btn-primary {
+        @apply inline-flex items-center justify-center px-5 py-2.5 rounded-md bg-pine-800 text-parchment text-sm font-medium hover:bg-pine-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+    }
+
+    .btn-secondary {
+        @apply inline-flex items-center justify-center px-5 py-2.5 rounded-md border border-pine-200 text-ink text-sm font-medium hover:border-pine-400 transition-colors;
+    }
+
+    .card {
+        @apply bg-white rounded-xl border border-pine-100 shadow-sm;
+    }
 }

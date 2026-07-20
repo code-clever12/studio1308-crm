@@ -10,7 +10,7 @@
     @else
         <div class="space-y-4">
             @foreach ($responses as $response)
-                <div class="bg-white shadow-sm rounded-lg p-6">
+                <div class="card">
                     <div class="flex items-center justify-between mb-3">
                         <p class="text-sm font-medium text-gray-900">{{ $response->appointment->customer->name }}</p>
                         <p class="text-xs text-gray-500">{{ $response->created_at->toFormattedDateString() }}</p>

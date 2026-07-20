@@ -12,25 +12,25 @@
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div class="bg-white shadow-sm rounded-lg p-6">
+        <div class="card">
             <div class="text-sm text-gray-500">{{ __("Today's Appointments") }}</div>
             <div class="text-2xl font-semibold text-gray-900">{{ $stats['todays_appointments'] }}</div>
         </div>
-        <div class="bg-white shadow-sm rounded-lg p-6">
+        <div class="card">
             <div class="text-sm text-gray-500">{{ __("Today's Revenue") }}</div>
             <div class="text-2xl font-semibold text-gray-900">${{ number_format($stats['todays_revenue'], 2) }}</div>
         </div>
-        <div class="bg-white shadow-sm rounded-lg p-6">
+        <div class="card">
             <div class="text-sm text-gray-500">{{ __('Active Customers') }}</div>
             <div class="text-2xl font-semibold text-gray-900">{{ $stats['active_customers'] }}</div>
         </div>
-        <div class="bg-white shadow-sm rounded-lg p-6">
+        <div class="card">
             <div class="text-sm text-gray-500">{{ __('Upcoming (7 days)') }}</div>
             <div class="text-2xl font-semibold text-gray-900">{{ $stats['upcoming_appointments'] }}</div>
         </div>
     </div>
 
-    <div class="bg-white shadow-sm rounded-lg p-6">
+    <div class="card">
         <h3 class="text-sm font-medium text-gray-500 mb-4">{{ __('Top Services This Month') }}</h3>
 
         @if ($topServices->isEmpty())

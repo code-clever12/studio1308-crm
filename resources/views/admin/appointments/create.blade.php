@@ -11,7 +11,7 @@
             staff: @js($staff->map(fn ($s) => ['id' => $s->id, 'name' => $s->user->name, 'service_ids' => $s->services->pluck('id')])),
             urls: { slots: @js(route('admin.appointments.slots')) },
         })"
-        class="max-w-2xl bg-white shadow-sm rounded-lg p-6"
+        class="max-w-2xl card"
     >
         <form method="POST" action="{{ route('admin.appointments.store') }}" class="space-y-5">
             @csrf
@@ -68,7 +68,7 @@
 
             <button
                 type="submit" :disabled="!startTime"
-                class="inline-flex items-center px-5 py-2.5 rounded-md bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-500 disabled:opacity-50"
+                class="btn-primary"
             >
                 {{ __('Book Appointment') }}
             </button>

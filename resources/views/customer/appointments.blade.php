@@ -38,13 +38,20 @@
                             <button type="button" @click="showReschedule = ! showReschedule" class="text-sm text-pine-700 hover:underline">
                                 {{ __('Reschedule') }}
                             </button>
-                            <form method="POST" action="{{ route('customer.appointments.destroy', $appointment) }}" onsubmit="return confirm('{{ __('Cancel this appointment?') }}');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-sm text-red-600 hover:underline">{{ __('Cancel') }}</button>
-                            </form>
+                            <button type="button" x-on:click="$dispatch('open-modal', 'cancel-appointment-{{ $appointment->id }}')" class="text-sm text-red-600 hover:underline">
+                                {{ __('Cancel') }}
+                            </button>
                         </x-slot>
                     </x-appointment-card>
+
+                    <x-confirm-modal
+                        id="cancel-appointment-{{ $appointment->id }}"
+                        :title="__('Cancel this appointment?')"
+                        :action="route('customer.appointments.destroy', $appointment)"
+                        :confirm-label="__('Cancel Appointment')"
+                    >
+                        {{ __('Your deposit will be refunded minus any late-cancellation fee, per the salon\'s cancellation policy.') }}
+                    </x-confirm-modal>
 
                     <div x-show="showReschedule" x-cloak class="bg-pine-50 border border-pine-100 border-t-0 rounded-b-lg p-4 -mt-2">
                         <form method="POST" action="{{ route('customer.appointments.update', $appointment) }}" class="flex flex-wrap items-end gap-3">

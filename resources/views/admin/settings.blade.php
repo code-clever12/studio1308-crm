@@ -5,7 +5,7 @@
         </h2>
     </x-slot>
 
-    <div class="max-w-3xl bg-white shadow-sm rounded-lg p-6">
+    <div class="max-w-3xl card">
         <form method="POST" action="{{ route('admin.settings.update') }}" class="space-y-8">
             @csrf
             @method('PUT')
@@ -107,7 +107,7 @@
                 </label>
             </div>
 
-            <button type="submit" class="inline-flex items-center px-5 py-2.5 rounded-md bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-500">
+            <button type="submit" class="btn-primary">
                 {{ __('Save Settings') }}
             </button>
         </form>

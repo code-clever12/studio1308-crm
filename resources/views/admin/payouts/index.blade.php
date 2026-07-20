@@ -5,7 +5,7 @@
         </h2>
     </x-slot>
 
-    <div class="bg-white shadow-sm rounded-lg p-6 mb-6">
+    <div class="card mb-6">
         <h3 class="text-sm font-semibold text-gray-800 mb-3">{{ __('Run Batch Payout') }}</h3>
         <p class="text-xs text-gray-500 mb-4">
             {{ __('Creates a pending payout for every staff member with a verified ACH account and earnings in this period. Actual bank transfers are wired up in Step 8.') }}
@@ -20,14 +20,14 @@
                 <label class="block text-xs text-gray-500 mb-1">{{ __('To') }}</label>
                 <input type="date" name="to" value="{{ now()->toDateString() }}" required class="rounded-md border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
             </div>
-            <button type="submit" class="px-4 py-2 rounded-md bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-500">
+            <button type="submit" class="btn-primary">
                 {{ __('Run Payouts') }}
             </button>
         </form>
     </div>
 
-    <div class="bg-white shadow-sm rounded-lg overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200">
+    <div class="data-table-wrapper">
+        <table class="data-table min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('Staff') }}</th>

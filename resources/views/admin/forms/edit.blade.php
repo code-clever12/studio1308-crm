@@ -5,7 +5,7 @@
         </h2>
     </x-slot>
 
-    <div class="max-w-2xl bg-white shadow-sm rounded-lg p-6">
+    <div class="max-w-2xl card">
         <form method="POST" action="{{ route('admin.forms.update', $form) }}" class="space-y-5">
             @csrf
             @method('PUT')
@@ -31,7 +31,7 @@
                 <x-form-builder :fields="$form->fields_json ?? []" />
             </div>
 
-            <button type="submit" class="inline-flex items-center px-5 py-2.5 rounded-md bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-500">
+            <button type="submit" class="btn-primary">
                 {{ __('Save Changes') }}
             </button>
         </form>

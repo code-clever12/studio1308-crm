@@ -6,7 +6,7 @@
     </x-slot>
 
     <div class="max-w-2xl space-y-6">
-        <div class="bg-white shadow-sm rounded-lg p-6">
+        <div class="card">
             <form method="POST" action="{{ route('admin.staff.update', $staff) }}" class="space-y-5">
                 @csrf
                 @method('PUT')
@@ -63,13 +63,30 @@
                     </div>
                 </div>
 
-                <button type="submit" class="inline-flex items-center px-5 py-2.5 rounded-md bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-500">
-                    {{ __('Save Changes') }}
-                </button>
+                <div class="flex items-center justify-between">
+                    <button type="submit" class="btn-primary">
+                        {{ __('Save Changes') }}
+                    </button>
+
+                    @if ($staff->status !== 'inactive')
+                        <button type="button" x-data x-on:click="$dispatch('open-modal', 'deactivate-staff')" class="text-sm text-red-600 hover:underline">
+                            {{ __('Deactivate Staff Member') }}
+                        </button>
+
+                        <x-confirm-modal
+                            id="deactivate-staff"
+                            :title="__('Deactivate :name?', ['name' => $staff->user->name])"
+                            :action="route('admin.staff.destroy', $staff)"
+                            :confirm-label="__('Deactivate')"
+                        >
+                            {{ __("They won't be bookable for new appointments and their account will be disabled. Existing appointments are unaffected.") }}
+                        </x-confirm-modal>
+                    @endif
+                </div>
             </form>
         </div>
 
-        <div class="bg-white shadow-sm rounded-lg p-6">
+        <div class="card">
             <h3 class="text-sm font-semibold text-gray-800 mb-1">{{ __('ACH Bank Account (for Payouts)') }}</h3>
             <p class="text-xs text-gray-500 mb-4">
                 {{ __('Used to pay out commission and tips. Stripe Connect verification is implemented in Step 8 — accounts save as "pending" until then.') }}

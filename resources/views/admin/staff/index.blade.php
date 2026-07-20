@@ -6,13 +6,13 @@
     </x-slot>
 
     <div class="flex justify-end mb-4">
-        <a href="{{ route('admin.staff.create') }}" class="inline-flex items-center px-4 py-2 rounded-md bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-500">
+        <a href="{{ route('admin.staff.create') }}" class="btn-primary">
             {{ __('+ Add Staff') }}
         </a>
     </div>
 
-    <div class="bg-white shadow-sm rounded-lg overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200">
+    <div class="data-table-wrapper">
+        <table class="data-table min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('Name') }}</th>
