@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
+use App\Events\AppointmentCancelled;
 use App\Models\Appointment;
 use App\Models\Salon;
-use App\Models\Waitlist;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
@@ -18,7 +18,6 @@ class CancellationService
 
     public function __construct(
         private readonly PaymentService $paymentService,
-        private readonly NotificationService $notificationService,
         private readonly SlotService $slotService,
     ) {
     }
@@ -44,8 +43,9 @@ class CancellationService
 
     /**
      * Cancel an appointment: computes the fee, refunds the deposit (minus fee)
-     * if a real Stripe payment was captured, frees the slot, and notifies the
-     * customer plus anyone waitlisted for a matching slot.
+     * if a real Stripe payment was captured, frees the slot, and dispatches
+     * AppointmentCancelled (SendCancellationNotification and
+     * NotifyMatchingWaitlist listen for it).
      */
     public function cancel(Appointment $appointment, ?string $reason = null): Appointment
     {
@@ -78,31 +78,11 @@ class CancellationService
                 $this->slotService->invalidate($appointment->staff, $appointment->appointment_date->toDateString());
             }
 
-            $this->notifyMatchingWaitlist($appointment);
-            $this->notificationService->sendCancellationConfirmation($appointment);
+            $appointment = $appointment->fresh(['service', 'staff.user', 'customer']);
 
-            return $appointment->fresh(['service', 'staff.user', 'customer']);
+            AppointmentCancelled::dispatch($appointment);
+
+            return $appointment;
         });
-    }
-
-    /**
-     * Notify waiting customers whose requested date is on or before the
-     * freed-up date, for the same service, per the spec's matching rule.
-     */
-    private function notifyMatchingWaitlist(Appointment $appointment): void
-    {
-        Waitlist::query()
-            ->where('service_id', $appointment->service_id)
-            ->where('status', 'waiting')
-            ->where('requested_date', '<=', $appointment->appointment_date)
-            ->get()
-            ->each(function (Waitlist $entry) {
-                $entry->update([
-                    'status' => 'notified',
-                    'notification_sent_at' => now(),
-                ]);
-
-                $this->notificationService->sendWaitlistNotification($entry);
-            });
     }
 }

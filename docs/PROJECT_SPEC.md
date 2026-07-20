@@ -1447,13 +1447,82 @@ php artisan make:middleware AdminMiddleware
 
 ### **STEP 4: Controllers, Jobs & Events**
 
-(Admin controllers: Appointment, Staff, Service, Schedule, Customer, FormBuilder,
-Dashboard, Report, Payout, Settings. Customer controllers: Browse, Booking,
-Appointment, Review, Tip. Plus PaymentController for Stripe webhooks.
-Queue Jobs: SendBookingConfirmation, SendAppointmentReminder,
-SendCancellationConfirmation, NotifyWaitlistCustomers, MarkNoShowAppointments,
-ChargeNoShowFee, SendTipReceipt, ProcessACHPayouts, SyncStripePaymentStatus.
-Events: AppointmentBooked, AppointmentCancelled, PaymentSucceeded.)
+#### Tasks:
+
+**Admin Controllers:**
+1. `Admin/AppointmentController.php`
+   - Index (calendar view), store (manual booking), update (reschedule), destroy (cancel)
+2. `Admin/StaffController.php`
+   - CRUD operations, assign services, manage ACH bank accounts
+3. `Admin/ServiceController.php`
+   - CRUD operations, manage pricing, categories, consent forms, tax status
+4. `Admin/ScheduleController.php`
+   - Set working hours, breaks, days off
+5. `Admin/CustomerController.php`
+   - CRM view, booking history, contact notes, loyalty points
+6. `Admin/FormBuilder.php`
+   - Create/edit consent intake forms
+7. `Admin/DashboardController.php`
+   - Analytics, KPIs, revenue charts
+8. `Admin/ReportController.php`
+   - Commission, revenue, customer acquisition, tax, tips reports
+9. `Admin/PayoutController.php` (USA-Specific)
+   - Manage ACH payouts to staff
+   - View payout history and status
+10. `Admin/SettingsController.php`
+    - Salon info, cancellation policy, no-show fees, tipping settings, sales tax config
+
+**Customer Controllers:**
+1. `Customer/BrowseController.php`
+   - Search & filter services, staff
+2. `Customer/BookingController.php`
+   - Multi-step booking workflow (Select Service → Choose Staff → Select Time → Consent Forms → Payment + Tip)
+   - AJAX slot loading with tax & tip calculations
+   - Stripe payment form integration
+3. `Customer/AppointmentController.php`
+   - View appointments (upcoming, past, cancelled)
+   - Cancel with automatic cancellation fee calculation
+   - Reschedule
+4. `Customer/ReviewController.php`
+   - Rate & review completed appointments
+5. `Customer/TipController.php` (USA-Specific)
+   - View tips given history
+   - Manage tip preferences for future appointments
+
+**General Controllers:**
+1. `PaymentController.php`
+   - Stripe webhook handling
+   - Refund processing
+
+**Queue Jobs:**
+1. `SendBookingConfirmation.php` → Send confirmation email after deposit + tip payment
+2. `SendAppointmentReminder.php` → Send reminder 24 hours before
+3. `SendCancellationConfirmation.php` → Send cancellation details with refund amount
+4. `NotifyWaitlistCustomers.php` → Notify waitlist when slot opens
+5. `MarkNoShowAppointments.php` → Auto-mark as no-show if 30+ min past start
+6. `ChargeNoShowFee.php` (USA-Specific) → Auto-charge no-show fee to credit card
+7. `SendTipReceipt.php` (USA-Specific) → Send tip confirmation to staff
+8. `ProcessACHPayouts.php` (USA-Specific) → Process staff commission + tip payouts
+9. `SyncStripePaymentStatus.php` → Sync payment status from Stripe webhooks
+
+**Events:**
+1. `AppointmentBooked.php` → Dispatched on successful booking
+2. `AppointmentCancelled.php` → Dispatched on cancellation
+3. `PaymentSucceeded.php` → Dispatched on payment webhook
+
+#### Deliverables:
+- ✅ `/app/Http/Controllers/Admin/` (all admin controllers)
+- ✅ `/app/Http/Controllers/Customer/` (all customer controllers)
+- ✅ `/app/Jobs/` (all queue jobs)
+- ✅ `/app/Events/` (all event classes)
+- ✅ `/app/Listeners/` (event listeners)
+
+#### Commands:
+```bash
+php artisan make:controller Admin/AppointmentController -r
+php artisan make:job SendBookingConfirmation
+php artisan make:event AppointmentBooked
+```
 
 ---
 

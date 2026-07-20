@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\AppointmentBooked;
 use App\Exceptions\BookingUnavailableException;
 use App\Models\Appointment;
 use App\Models\AppointmentFormResponse;
@@ -41,6 +42,11 @@ class BookingService
         string $startTime,
         array $formResponses = [],
     ): Appointment {
+        // Normalize to H:i:s — MySQL silently pads a bare "H:i" TIME value on write,
+        // but SQLite (used in tests) stores it verbatim, causing inconsistent
+        // string comparisons against already-normalized values.
+        $startTime = Carbon::parse($startTime)->format('H:i:s');
+
         if (! $customer->is_active) {
             throw new InvalidArgumentException('Your account has booking restrictions. Contact support.');
         }
@@ -96,13 +102,18 @@ class BookingService
                 $this->slotService->invalidate($resolvedStaff, $date);
             }
 
-            return $appointment->fresh(['service', 'staff.user', 'customer']);
+            $appointment = $appointment->fresh(['service', 'staff.user', 'customer']);
+
+            AppointmentBooked::dispatch($appointment);
+
+            return $appointment;
         });
     }
 
     /**
      * Join the waitlist when no slot is available for a preferred date/staff.
-     * CancellationService notifies matching entries when a spot opens up.
+     * NotifyMatchingWaitlist (listening for AppointmentCancelled) notifies
+     * matching entries when a spot opens up.
      */
     public function joinWaitlist(User $customer, Service $service, ?Staff $staff, string $requestedDate, ?string $timePreference = null): Waitlist
     {
