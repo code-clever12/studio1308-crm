@@ -25,7 +25,9 @@ class ConsentFormRequest extends FormRequest
             'fields.*.label' => ['required', 'string'],
             'fields.*.type' => ['required', 'string', 'in:text,email,checkbox,radio,date,file'],
             'fields.*.required' => ['boolean'],
-            'fields.*.options' => ['nullable', 'array'],
+            // Submitted as a comma-separated string from the form-builder component;
+            // FormBuilderController splits it into an array before persisting.
+            'fields.*.options' => ['nullable', 'string'],
         ];
     }
 }

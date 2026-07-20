@@ -10,7 +10,9 @@ use App\Models\User;
 use App\Services\BookingService;
 use App\Services\CancellationService;
 use App\Services\SlotService;
+use App\Services\TipService;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -21,6 +23,7 @@ class AppointmentController extends Controller
         private readonly BookingService $bookingService,
         private readonly CancellationService $cancellationService,
         private readonly SlotService $slotService,
+        private readonly TipService $tipService,
     ) {
     }
 
@@ -50,6 +53,33 @@ class AppointmentController extends Controller
     }
 
     /**
+     * AJAX endpoint mirroring Customer\BookingController::slots() for the
+     * admin walk-in form (customer.booking.slots is gated to role:customer).
+     */
+    public function slots(Request $request): JsonResponse
+    {
+        $this->authorize('create', Appointment::class);
+
+        $data = $request->validate([
+            'service_id' => ['required', 'integer', 'exists:services,id'],
+            'staff_id' => ['nullable', 'integer', 'exists:staff,id'],
+            'date' => ['required', 'date', 'after_or_equal:today'],
+        ]);
+
+        $service = Service::findOrFail($data['service_id']);
+
+        $staffList = isset($data['staff_id'])
+            ? Staff::where('id', $data['staff_id'])->get()
+            : $service->staff()->wherePivot('is_available', true)->where('status', 'active')->get();
+
+        $slots = $staffList
+            ->mapWithKeys(fn (Staff $staff) => [$staff->id => $this->slotService->getAvailableSlots($staff, $data['date'], $service)])
+            ->filter(fn (array $staffSlots) => ! empty($staffSlots));
+
+        return response()->json(['slots' => $slots]);
+    }
+
+    /**
      * Manual walk-in booking. Unlike online self-service bookings, walk-ins
      * are confirmed immediately since the front desk handles payment in person.
      */
@@ -63,6 +93,7 @@ class AppointmentController extends Controller
             'staff_id' => ['nullable', 'integer', 'exists:staff,id'],
             'appointment_date' => ['required', 'date', 'after_or_equal:today'],
             'start_time' => ['required', 'date_format:H:i'],
+            'tip_amount' => ['nullable', 'numeric', 'min:0'],
         ]);
 
         $customer = User::findOrFail($data['customer_id']);
@@ -83,6 +114,10 @@ class AppointmentController extends Controller
             'deposit_paid' => $appointment->total_amount,
             'remaining_balance' => 0,
         ]);
+
+        if (! empty($data['tip_amount']) && $appointment->staff_id) {
+            $this->tipService->recordTip($appointment, (float) $data['tip_amount'], $customer);
+        }
 
         return redirect()->route('admin.appointments.index')->with('status', 'Appointment booked.');
     }

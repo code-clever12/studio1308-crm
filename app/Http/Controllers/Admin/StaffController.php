@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StaffRequest;
+use App\Models\ACHBankAccount;
 use App\Models\Service;
 use App\Models\Staff;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -111,5 +113,34 @@ class StaffController extends Controller
         });
 
         return redirect()->route('admin.staff.index')->with('status', 'Staff member deactivated.');
+    }
+
+    /**
+     * Add or replace a staff member's ACH bank account on file for payouts.
+     */
+    public function updateAchAccount(Request $request, Staff $staff): RedirectResponse
+    {
+        $this->authorize('update', $staff);
+
+        $data = $request->validate([
+            'bank_account_holder_name' => ['required', 'string', 'max:255'],
+            'bank_name' => ['nullable', 'string', 'max:255'],
+            'bank_account_routing_number' => ['required', 'digits:9'],
+            'bank_account_number' => ['required', 'digits_between:4,17'],
+        ]);
+
+        ACHBankAccount::updateOrCreate(
+            ['staff_id' => $staff->id],
+            [
+                'bank_account_holder_name' => $data['bank_account_holder_name'],
+                'bank_name' => $data['bank_name'] ?? null,
+                'bank_account_routing_number' => $data['bank_account_routing_number'],
+                'bank_account_number' => $data['bank_account_number'],
+                'last_4_digits' => substr($data['bank_account_number'], -4),
+                'verification_status' => 'pending',
+            ]
+        );
+
+        return redirect()->route('admin.staff.edit', $staff)->with('status', 'Bank account saved. Verification is pending Stripe Connect integration (Step 8).');
     }
 }

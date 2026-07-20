@@ -3,6 +3,46 @@
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 
+/*
+ * "Ritual" brand tokens — grounded in an actual barbershop, not a generic
+ * wellness spa: deep pine green + warm brass on warm parchment, with a
+ * condensed signage face for headings (barber-pole / ticket-stub energy)
+ * paired with Figtree for body copy.
+ */
 @theme {
     --font-sans: 'Figtree', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-display: 'Oswald', ui-sans-serif, system-ui, sans-serif;
+
+    --color-ink: #16231c;
+    --color-pine-950: #0e1f17;
+    --color-pine-900: #14301f;
+    --color-pine-800: #1f3d2b;
+    --color-pine-700: #2c5744;
+    --color-pine-600: #3a6d55;
+    --color-pine-100: #e2ece4;
+    --color-pine-50: #f0f5f1;
+
+    --color-brass-600: #9c7a2e;
+    --color-brass-500: #b8923f;
+    --color-brass-400: #cba658;
+    --color-brass-100: #f1e6c8;
+    --color-brass-50: #f8f2e2;
+
+    --color-parchment: #f6f3ec;
+    --color-parchment-deep: #ede7d8;
+
+    --color-status-confirmed: #2f7a4d;
+    --color-status-pending: #b8923f;
+    --color-status-cancelled: #b23a34;
+    --color-status-completed: #2c5744;
+    --color-status-noshow: #6b6155;
+}
+
+[x-cloak] {
+    display: none !important;
+}
+
+.font-display {
+    font-family: var(--font-display);
+    letter-spacing: 0.02em;
 }

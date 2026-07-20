@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Service;
 use App\Models\Staff;
 use Illuminate\Http\Request;
@@ -27,6 +28,8 @@ class BrowseController extends Controller
             ->withAvg('reviews', 'rating')
             ->get();
 
-        return view('customer.browse', compact('services', 'staff'));
+        $categories = Category::orderBy('display_order')->get();
+
+        return view('customer.browse', compact('services', 'staff', 'categories'));
     }
 }

@@ -25,10 +25,44 @@ class BookingController extends Controller
     ) {
     }
 
-    public function create(): View
+    public function create(Request $request): View
     {
+        $services = Service::with(['category', 'consentForm', 'staff'])
+            ->where('is_active', true)
+            ->orderBy('display_order')
+            ->get()
+            ->map(fn (Service $service) => [
+                'id' => $service->id,
+                'name' => $service->name,
+                'description' => $service->description,
+                'category' => $service->category?->name,
+                'price' => (float) $service->price,
+                'duration_minutes' => $service->duration_minutes,
+                'is_taxable' => $service->is_taxable,
+                'requires_consent_form' => $service->requires_consent_form,
+                'consent_form' => $service->consentForm ? [
+                    'id' => $service->consentForm->id,
+                    'name' => $service->consentForm->name,
+                    'fields' => $service->consentForm->fields_json,
+                ] : null,
+            ]);
+
+        $staff = Staff::with('user')
+            ->where('status', 'active')
+            ->withAvg('reviews', 'rating')
+            ->get()
+            ->map(fn (Staff $member) => [
+                'id' => $member->id,
+                'name' => $member->user->name,
+                'bio' => $member->bio,
+                'rating' => $member->reviews_avg_rating ? round((float) $member->reviews_avg_rating, 1) : null,
+                'service_ids' => $member->services->pluck('id')->all(),
+            ]);
+
         return view('customer.booking.create', [
-            'services' => Service::where('is_active', true)->orderBy('display_order')->get(),
+            'servicesForJs' => $services,
+            'staffForJs' => $staff,
+            'preselectedServiceId' => $request->integer('service') ?: null,
         ]);
     }
 
@@ -71,7 +105,7 @@ class BookingController extends Controller
         return response()->json($this->paymentService->calculateBreakdown($service, (float) ($data['tip'] ?? 0)));
     }
 
-    public function store(BookingRequest $request): RedirectResponse
+    public function store(BookingRequest $request): RedirectResponse|JsonResponse
     {
         $staff = $request->validated('staff_id') ? Staff::findOrFail($request->validated('staff_id')) : null;
 
@@ -85,20 +119,24 @@ class BookingController extends Controller
                 $request->validated('form_responses', []),
             );
         } catch (BookingUnavailableException $e) {
-            return back()->withErrors(['start_time' => $e->getMessage()])->withInput();
+            return $this->bookingErrorResponse($request, 'start_time', $e->getMessage());
         } catch (InvalidArgumentException $e) {
-            return back()->withErrors(['booking' => $e->getMessage()])->withInput();
+            return $this->bookingErrorResponse($request, 'booking', $e->getMessage());
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json(['appointment_id' => $appointment->id], 201);
         }
 
         return redirect()->route('customer.appointments.index')
-            ->with('status', 'Appointment requested! Complete payment to confirm your booking.')
+            ->with('status', 'Appointment requested! We will confirm shortly.')
             ->with('appointment_id', $appointment->id);
     }
 
     /**
      * Join the waitlist when no slot is available for a preferred date/staff.
      */
-    public function joinWaitlist(Request $request): RedirectResponse
+    public function joinWaitlist(Request $request): RedirectResponse|JsonResponse
     {
         $data = $request->validate([
             'service_id' => ['required', 'integer', 'exists:services,id'],
@@ -115,6 +153,19 @@ class BookingController extends Controller
             $data['time_preference'] ?? null,
         );
 
+        if ($request->expectsJson()) {
+            return response()->json(['joined' => true], 201);
+        }
+
         return redirect()->route('dashboard')->with('status', "You're on the waitlist! We'll notify you if a spot opens up.");
+    }
+
+    private function bookingErrorResponse(Request $request, string $field, string $message): RedirectResponse|JsonResponse
+    {
+        if ($request->expectsJson()) {
+            return response()->json(['message' => $message, 'errors' => [$field => [$message]]], 422);
+        }
+
+        return back()->withErrors([$field => $message])->withInput();
     }
 }

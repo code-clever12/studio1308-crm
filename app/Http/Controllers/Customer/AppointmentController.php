@@ -24,7 +24,7 @@ class AppointmentController extends Controller
         $this->authorize('viewAny', Appointment::class);
 
         $appointments = $request->user()->appointments()
-            ->with(['service', 'staff.user'])
+            ->with(['service', 'staff.user', 'review'])
             ->orderByDesc('appointment_date')
             ->orderByDesc('start_time')
             ->get()

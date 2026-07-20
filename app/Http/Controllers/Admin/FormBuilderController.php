@@ -31,7 +31,7 @@ class FormBuilderController extends Controller
             'salon_id' => Salon::query()->firstOrFail()->id,
             'name' => $request->validated('name'),
             'description' => $request->validated('description'),
-            'fields_json' => $request->validated('fields'),
+            'fields_json' => $this->normalizeFields($request->validated('fields')),
             'is_active' => $request->boolean('is_active', true),
         ]);
 
@@ -48,7 +48,7 @@ class FormBuilderController extends Controller
         $form->update([
             'name' => $request->validated('name'),
             'description' => $request->validated('description'),
-            'fields_json' => $request->validated('fields'),
+            'fields_json' => $this->normalizeFields($request->validated('fields')),
             'is_active' => $request->boolean('is_active', true),
         ]);
 
@@ -71,5 +71,26 @@ class FormBuilderController extends Controller
             'form' => $form,
             'responses' => $form->appointmentFormResponses()->with('appointment.customer')->latest()->get(),
         ]);
+    }
+
+    /**
+     * The form-builder component submits "required" as "1"/"0" strings and
+     * "options" as a comma-separated string; convert both to the shape
+     * ConsentForm::fields_json expects.
+     *
+     * @param  array<int, array<string, mixed>>  $fields
+     * @return array<int, array<string, mixed>>
+     */
+    private function normalizeFields(array $fields): array
+    {
+        return collect($fields)->map(fn (array $field) => [
+            'id' => $field['id'],
+            'label' => $field['label'],
+            'type' => $field['type'],
+            'required' => (bool) ($field['required'] ?? false),
+            'options' => filled($field['options'] ?? null)
+                ? array_map('trim', explode(',', $field['options']))
+                : null,
+        ])->all();
     }
 }

@@ -23,8 +23,26 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
+Route::get('/dashboard', function (\Illuminate\Http\Request $request) {
+    $user = $request->user();
+
+    if (! $user->isCustomer()) {
+        return view('dashboard');
+    }
+
+    $upcoming = $user->appointments()
+        ->with(['service', 'staff.user'])
+        ->whereIn('status', ['pending', 'confirmed'])
+        ->orderBy('appointment_date')
+        ->orderBy('start_time')
+        ->take(3)
+        ->get();
+
+    return view('dashboard', [
+        'upcoming' => $upcoming,
+        'loyaltyPoints' => $user->loyaltyPoints,
+        'waitlistCount' => $user->waitlistEntries()->where('status', 'waiting')->count(),
+    ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
@@ -65,8 +83,10 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('appointments', AdminAppointmentController::class)->except(['show', 'edit']);
+    Route::get('/appointments-slots', [AdminAppointmentController::class, 'slots'])->name('appointments.slots');
 
     Route::resource('staff', StaffController::class)->except(['show']);
+    Route::put('/staff/{staff}/ach-account', [StaffController::class, 'updateAchAccount'])->name('staff.ach-account.update');
     Route::get('/staff/{staff}/schedule', [ScheduleController::class, 'edit'])->name('schedules.edit');
     Route::put('/staff/{staff}/schedule', [ScheduleController::class, 'update'])->name('schedules.update');
     Route::post('/staff/{staff}/days-off', [ScheduleController::class, 'storeDayOff'])->name('schedules.days-off.store');
