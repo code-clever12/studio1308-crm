@@ -35,4 +35,16 @@ return [
         ],
     ],
 
+    /*
+    | USA payment processing: deposits, tips, no-show fee charges, and
+    | ACH Connect payouts to staff. Wired up in Step 8 — see
+    | App\Services\PaymentService, NoShowFeeService::chargeFee(), and
+    | ACHPayoutService::initiateTransfer() for the stubbed call sites.
+    */
+    'stripe' => [
+        'key' => env('STRIPE_KEY'),
+        'secret' => env('STRIPE_SECRET'),
+        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+    ],
+
 ];

@@ -115,5 +115,6 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
 });
 
 Route::post('/webhooks/stripe', [PaymentController::class, 'webhook'])->name('webhooks.stripe');
+Route::post('/webhooks/stripe/payouts', [PaymentController::class, 'payoutWebhook'])->name('webhooks.stripe.payouts');
 
 require __DIR__.'/auth.php';
