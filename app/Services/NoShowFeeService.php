@@ -4,11 +4,14 @@ namespace App\Services;
 
 use App\Models\Appointment;
 use App\Models\Payment;
+use App\Models\Salon;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use InvalidArgumentException;
 use RuntimeException;
+use Stripe\Exception\ApiErrorException;
+use Stripe\StripeClient;
 
 class NoShowFeeService
 {
@@ -23,10 +26,14 @@ class NoShowFeeService
      */
     private const BLOCK_THRESHOLD = 3;
 
+    public function __construct(private readonly StripeClient $stripe)
+    {
+    }
+
     /**
      * Appointments whose start time + grace period has passed and are still
      * awaiting completion. Step 4's scheduled job calls this and marks each
-     * one as a no-show (and attempts to charge the fee, once Step 8 lands).
+     * one as a no-show (and attempts to charge the fee).
      *
      * @return Collection<int, Appointment>
      */
@@ -45,9 +52,7 @@ class NoShowFeeService
 
     /**
      * Mark an appointment as a no-show and auto-block the customer after
-     * repeated offenses. Does NOT charge the fee — that requires the Stripe
-     * card-on-file charge implemented in Step 8, orchestrated by the
-     * scheduled job in Step 4.
+     * repeated offenses. Does NOT charge the fee — see chargeFee().
      */
     public function markNoShow(Appointment $appointment): Appointment
     {
@@ -65,11 +70,56 @@ class NoShowFeeService
     }
 
     /**
-     * Charges the no-show fee to the customer's card on file. Implemented in Step 8.
+     * Charges the no-show fee to the customer's card on file (saved via
+     * setup_future_usage during their deposit payment). Throws a
+     * RuntimeException — wrapping any Stripe decline/API error — if there's
+     * no card on file or the off-session charge fails, so callers (the
+     * ChargeNoShowFee job) can handle it uniformly without depending on
+     * Stripe's exception types directly.
      */
     public function chargeFee(Appointment $appointment): Payment
     {
-        throw new RuntimeException('Stripe no-show fee charging is implemented in Step 8.');
+        $customer = $appointment->customer;
+
+        if (! $customer->stripe_customer_id || ! $customer->stripe_payment_method_id) {
+            throw new RuntimeException("No card on file for customer #{$customer->id}; cannot charge the no-show fee.");
+        }
+
+        $salon = Salon::query()->firstOrFail();
+        $feeAmount = round((float) $salon->no_show_fee, 2);
+
+        try {
+            $intent = $this->stripe->paymentIntents->create([
+                'amount' => (int) round($feeAmount * 100),
+                'currency' => 'usd',
+                'customer' => $customer->stripe_customer_id,
+                'payment_method' => $customer->stripe_payment_method_id,
+                'off_session' => true,
+                'confirm' => true,
+                'metadata' => [
+                    'appointment_id' => $appointment->id,
+                    'reason' => 'no_show_fee',
+                ],
+            ]);
+        } catch (ApiErrorException $e) {
+            throw new RuntimeException(
+                "Failed to charge no-show fee for appointment #{$appointment->id}: {$e->getMessage()}",
+                previous: $e,
+            );
+        }
+
+        return Payment::create([
+            'appointment_id' => $appointment->id,
+            'customer_id' => $customer->id,
+            'amount' => $feeAmount,
+            'breakdown_json' => ['no_show_fee' => $feeAmount],
+            'payment_method' => 'stripe_card',
+            'stripe_payment_intent_id' => $intent->id,
+            'stripe_charge_id' => $intent->latest_charge,
+            'currency' => 'USD',
+            'status' => $intent->status === 'succeeded' ? 'succeeded' : 'pending',
+            'payment_date' => now(),
+        ]);
     }
 
     public function noShowCountForCustomer(User $customer): int

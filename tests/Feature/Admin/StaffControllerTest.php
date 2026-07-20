@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\ACHBankAccount;
 use App\Models\Service;
 use App\Models\Staff;
 use App\Models\User;
@@ -62,6 +63,42 @@ it('deactivates a staff member and their user account on destroy', function () {
 
     expect($staff->fresh()->status)->toBe('inactive')
         ->and($staff->user->fresh()->is_active)->toBeFalse();
+});
+
+it('lets an admin verify a staff bank account with Stripe', function () {
+    $staff = Staff::factory()->create();
+    ACHBankAccount::factory()->create(['staff_id' => $staff->id, 'verification_status' => 'pending']);
+
+    $http = mockStripeHttp();
+    $http->shouldReceive('request')->once()
+        ->withArgs(fn ($method, $url) => str_contains($url, '/v1/accounts') && ! str_contains($url, 'external_accounts'))
+        ->andReturn(stripeHttpResponse(['id' => 'acct_test123', 'object' => 'account']));
+    $http->shouldReceive('request')->once()
+        ->withArgs(fn ($method, $url) => str_contains($url, '/external_accounts'))
+        ->andReturn(stripeHttpResponse(['id' => 'ba_test123', 'object' => 'bank_account', 'status' => 'new']));
+
+    $this->actingAs($this->admin)
+        ->post(route('admin.staff.ach-account.verify', $staff))
+        ->assertRedirect(route('admin.staff.edit', $staff));
+
+    expect($staff->achBankAccount->fresh()->verification_status)->toBe('verified');
+});
+
+it('shows an error when Stripe verification fails', function () {
+    $staff = Staff::factory()->create();
+    ACHBankAccount::factory()->create(['staff_id' => $staff->id, 'verification_status' => 'pending']);
+
+    $http = mockStripeHttp();
+    $http->shouldReceive('request')->once()
+        ->andReturn(stripeHttpResponse([
+            'error' => ['type' => 'invalid_request_error', 'message' => 'Missing required param.'],
+        ], 400));
+
+    $this->actingAs($this->admin)
+        ->post(route('admin.staff.ach-account.verify', $staff))
+        ->assertSessionHasErrors('ach');
+
+    expect($staff->achBankAccount->fresh()->verification_status)->toBe('failed');
 });
 
 it('blocks a non-admin from managing staff', function () {

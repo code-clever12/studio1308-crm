@@ -9,6 +9,7 @@
                 store: @js(route('customer.booking.store')),
                 waitlist: @js(route('customer.booking.waitlist')),
                 appointments: @js(route('customer.appointments.index')),
+                payment: @js(route('customer.booking.payment', ['appointment' => '__APPOINTMENT_ID__'])),
             },
             csrf: @js(csrf_token()),
         })"
@@ -213,15 +214,11 @@
                 </div>
             </div>
 
-            <p class="text-xs text-ink/50 mt-3">
-                {{ __("Online card payment is coming soon — for now we'll confirm your appointment and collect your deposit at check-in.") }}
-            </p>
-
             <button
                 type="button" @click="submitBooking()" :disabled="submitting"
                 class="mt-6 inline-flex items-center px-6 py-3 rounded-md bg-pine-800 text-parchment font-medium hover:bg-pine-700 disabled:opacity-50 transition-colors"
             >
-                <span x-show="!submitting">{{ __('Confirm Booking Request') }}</span>
+                <span x-show="!submitting">{{ __('Continue to Payment') }}</span>
                 <span x-show="submitting" x-cloak>{{ __('Booking…') }}</span>
             </button>
         </div>

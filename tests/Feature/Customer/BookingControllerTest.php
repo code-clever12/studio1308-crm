@@ -114,3 +114,81 @@ it('blocks staff and admin from customer booking routes', function () {
     $this->actingAs($staffUser)->getJson(route('customer.booking.slots', ['service_id' => $this->service->id, 'date' => customerNextMonday()]))->assertForbidden();
     $this->actingAs($admin)->getJson(route('customer.booking.slots', ['service_id' => $this->service->id, 'date' => customerNextMonday()]))->assertForbidden();
 });
+
+it('returns the new appointment id as json for the booking wizard to redirect into payment', function () {
+    $response = $this->actingAs($this->customer)->postJson(route('customer.booking.store'), [
+        'service_id' => $this->service->id,
+        'staff_id' => $this->staff->id,
+        'appointment_date' => customerNextMonday(),
+        'start_time' => '10:00',
+    ]);
+
+    $response->assertCreated()->assertJsonStructure(['appointment_id']);
+});
+
+it('shows the Stripe payment step with a client secret when Stripe is configured', function () {
+    $appointment = Appointment::factory()->create([
+        'customer_id' => $this->customer->id,
+        'service_id' => $this->service->id,
+        'status' => 'pending',
+    ]);
+
+    $http = mockStripeHttp();
+    $http->shouldReceive('request')->once()
+        ->withArgs(fn ($method, $url) => str_contains($url, '/v1/customers'))
+        ->andReturn(stripeHttpResponse(['id' => 'cus_test123', 'object' => 'customer']));
+    $http->shouldReceive('request')->once()
+        ->withArgs(fn ($method, $url) => str_contains($url, '/v1/payment_intents'))
+        ->andReturn(stripeHttpResponse([
+            'id' => 'pi_test123',
+            'object' => 'payment_intent',
+            'client_secret' => 'pi_test123_secret_abc',
+            'status' => 'requires_payment_method',
+        ]));
+
+    $this->actingAs($this->customer)
+        ->get(route('customer.booking.payment', $appointment))
+        ->assertOk()
+        ->assertSee('pi_test123_secret_abc', false);
+});
+
+it('shows a graceful not-connected message when Stripe keys are not configured', function () {
+    config(['services.stripe.key' => null, 'services.stripe.secret' => null]);
+
+    $appointment = Appointment::factory()->create([
+        'customer_id' => $this->customer->id,
+        'service_id' => $this->service->id,
+        'status' => 'pending',
+    ]);
+
+    $this->actingAs($this->customer)
+        ->get(route('customer.booking.payment', $appointment))
+        ->assertOk()
+        ->assertSee("isn't connected yet");
+});
+
+it('blocks a customer from viewing another customer\'s payment page', function () {
+    $otherCustomer = User::factory()->create(['role' => 'customer']);
+    $appointment = Appointment::factory()->create([
+        'customer_id' => $otherCustomer->id,
+        'service_id' => $this->service->id,
+        'status' => 'pending',
+    ]);
+
+    $this->actingAs($this->customer)
+        ->get(route('customer.booking.payment', $appointment))
+        ->assertForbidden();
+});
+
+it('shows the booking confirmation page', function () {
+    $appointment = Appointment::factory()->create([
+        'customer_id' => $this->customer->id,
+        'service_id' => $this->service->id,
+        'status' => 'confirmed',
+    ]);
+
+    $this->actingAs($this->customer)
+        ->get(route('customer.booking.confirmation', $appointment))
+        ->assertOk()
+        ->assertSee("You're all set!");
+});

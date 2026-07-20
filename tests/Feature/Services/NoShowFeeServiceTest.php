@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Appointment;
+use App\Models\Salon;
 use App\Models\User;
 use App\Services\NoShowFeeService;
 use Carbon\Carbon;
@@ -58,3 +59,61 @@ it('does not block a customer with fewer than three no-shows', function () {
 
     expect($customer->fresh()->is_active)->toBeTrue();
 });
+
+it('refuses to charge a no-show fee when the customer has no card on file', function () {
+    $appointment = Appointment::factory()->create(['status' => 'no_show']);
+
+    $this->noShowFeeService->chargeFee($appointment);
+})->throws(RuntimeException::class);
+
+it('charges the saved card off-session for the salon no-show fee', function () {
+    Salon::factory()->create(['no_show_fee' => 35]);
+
+    $customer = User::factory()->create([
+        'role' => 'customer',
+        'stripe_customer_id' => 'cus_test123',
+        'stripe_payment_method_id' => 'pm_test123',
+    ]);
+    $appointment = Appointment::factory()->create(['status' => 'no_show', 'customer_id' => $customer->id]);
+
+    $http = mockStripeHttp();
+    $http->shouldReceive('request')->once()
+        ->withArgs(fn ($method, $url, $headers, $params) => $method === 'post'
+            && str_contains($url, '/v1/payment_intents')
+            && $params['amount'] === 3500
+            && $params['customer'] === 'cus_test123'
+            && $params['payment_method'] === 'pm_test123'
+            && $params['off_session'] === 'true'
+            && $params['confirm'] === 'true')
+        ->andReturn(stripeHttpResponse([
+            'id' => 'pi_noshow123',
+            'object' => 'payment_intent',
+            'status' => 'succeeded',
+            'latest_charge' => 'ch_noshow123',
+        ]));
+
+    $payment = $this->noShowFeeService->chargeFee($appointment);
+
+    expect($payment->status)->toBe('succeeded')
+        ->and((float) $payment->amount)->toBe(35.0)
+        ->and($payment->stripe_payment_intent_id)->toBe('pi_noshow123');
+});
+
+it('wraps a declined off-session charge as a RuntimeException', function () {
+    Salon::factory()->create(['no_show_fee' => 35]);
+
+    $customer = User::factory()->create([
+        'role' => 'customer',
+        'stripe_customer_id' => 'cus_test123',
+        'stripe_payment_method_id' => 'pm_test123',
+    ]);
+    $appointment = Appointment::factory()->create(['status' => 'no_show', 'customer_id' => $customer->id]);
+
+    $http = mockStripeHttp();
+    $http->shouldReceive('request')->once()
+        ->andReturn(stripeHttpResponse([
+            'error' => ['type' => 'card_error', 'code' => 'card_declined', 'message' => 'Your card was declined.'],
+        ], 402));
+
+    $this->noShowFeeService->chargeFee($appointment);
+})->throws(RuntimeException::class);

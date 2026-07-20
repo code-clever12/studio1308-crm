@@ -63,6 +63,8 @@ Route::middleware(['auth', 'verified', 'role:customer'])->prefix('customer')->na
     Route::get('/booking/slots', [BookingController::class, 'slots'])->name('booking.slots');
     Route::get('/booking/breakdown', [BookingController::class, 'breakdown'])->name('booking.breakdown');
     Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
+    Route::get('/booking/{appointment}/payment', [BookingController::class, 'payment'])->name('booking.payment');
+    Route::get('/booking/{appointment}/confirmation', [BookingController::class, 'confirmation'])->name('booking.confirmation');
     Route::post('/booking/waitlist', [BookingController::class, 'joinWaitlist'])->name('booking.waitlist');
 
     Route::get('/appointments', [CustomerAppointmentController::class, 'index'])->name('appointments.index');
@@ -87,6 +89,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
 
     Route::resource('staff', StaffController::class)->except(['show']);
     Route::put('/staff/{staff}/ach-account', [StaffController::class, 'updateAchAccount'])->name('staff.ach-account.update');
+    Route::post('/staff/{staff}/ach-account/verify', [StaffController::class, 'verifyAchAccount'])->name('staff.ach-account.verify');
     Route::get('/staff/{staff}/schedule', [ScheduleController::class, 'edit'])->name('schedules.edit');
     Route::put('/staff/{staff}/schedule', [ScheduleController::class, 'update'])->name('schedules.update');
     Route::post('/staff/{staff}/days-off', [ScheduleController::class, 'storeDayOff'])->name('schedules.days-off.store');

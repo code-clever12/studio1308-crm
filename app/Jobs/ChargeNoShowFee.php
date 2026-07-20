@@ -12,9 +12,10 @@ use RuntimeException;
 
 /**
  * Charges the no-show fee to the customer's card on file. Dispatched by
- * MarkNoShowAppointments. The actual Stripe charge
- * (NoShowFeeService::chargeFee) is implemented in Step 8 — until then this
- * job logs and exits cleanly rather than failing the queue.
+ * MarkNoShowAppointments. NoShowFeeService::chargeFee() wraps any Stripe
+ * decline/API error (or a missing card on file) as a RuntimeException, so
+ * this job logs and exits cleanly rather than failing the queue for a
+ * legitimately-declined charge.
  */
 class ChargeNoShowFee implements ShouldQueue
 {
@@ -33,7 +34,7 @@ class ChargeNoShowFee implements ShouldQueue
 
             $notificationService->sendNoShowFeeReceipt($this->appointment, (float) $payment->amount);
         } catch (RuntimeException $e) {
-            Log::info('No-show fee charge skipped (Stripe not yet integrated): '.$e->getMessage(), [
+            Log::warning('No-show fee charge failed: '.$e->getMessage(), [
                 'appointment_id' => $this->appointment->id,
             ]);
         }

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\ACHPayout;
 use App\Models\Appointment;
 use App\Models\Tip;
 use App\Models\User;
@@ -11,6 +12,7 @@ use App\Notifications\AppointmentCancelled;
 use App\Notifications\AppointmentReminder;
 use App\Notifications\BookingConfirmed;
 use App\Notifications\NoShowFeeCharged;
+use App\Notifications\PayoutFailed;
 use App\Notifications\StaffAssigned;
 use App\Notifications\TipReceived;
 use App\Notifications\WaitlistSlotAvailable;
@@ -69,6 +71,13 @@ class NotificationService
     {
         User::where('role', 'admin')->get()->each(
             fn (User $admin) => $admin->notify(new AdminDailySummary($stats))
+        );
+    }
+
+    public function sendPayoutFailedAlert(ACHPayout $payout): void
+    {
+        User::where('role', 'admin')->get()->each(
+            fn (User $admin) => $admin->notify(new PayoutFailed($payout))
         );
     }
 }

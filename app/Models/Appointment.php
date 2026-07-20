@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Database\Factories\AppointmentFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -107,5 +108,24 @@ class Appointment extends Model
     public function waitlistConversion(): HasOne
     {
         return $this->hasOne(Waitlist::class, 'converted_appointment_id');
+    }
+
+    /**
+     * "Add to Google Calendar" link for the confirmation page — no ICS file
+     * generation needed since Google's render endpoint just takes query params.
+     */
+    public function calendarInviteUrl(): string
+    {
+        $start = Carbon::parse($this->appointment_date->toDateString().' '.$this->start_time);
+        $end = Carbon::parse($this->appointment_date->toDateString().' '.$this->end_time);
+
+        $params = [
+            'action' => 'TEMPLATE',
+            'text' => $this->service->name.' at '.config('app.name'),
+            'dates' => $start->format('Ymd\THis').'/'.$end->format('Ymd\THis'),
+            'details' => __('Your appointment at :salon.', ['salon' => config('app.name')]),
+        ];
+
+        return 'https://calendar.google.com/calendar/render?'.http_build_query($params);
     }
 }

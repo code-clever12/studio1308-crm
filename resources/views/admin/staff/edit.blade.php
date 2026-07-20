@@ -89,7 +89,7 @@
         <div class="card">
             <h3 class="text-sm font-semibold text-gray-800 mb-1">{{ __('ACH Bank Account (for Payouts)') }}</h3>
             <p class="text-xs text-gray-500 mb-4">
-                {{ __('Used to pay out commission and tips. Stripe Connect verification is implemented in Step 8 — accounts save as "pending" until then.') }}
+                {{ __('Used to pay out commission and tips via Stripe Connect. Save the details below, then verify with Stripe before running payouts.') }}
             </p>
 
             @if ($staff->achBankAccount)
@@ -98,6 +98,15 @@
                     <span class="text-gray-600">
                         {{ $staff->achBankAccount->bank_name ?? __('Bank') }} &middot; ****{{ $staff->achBankAccount->last_4_digits }}
                     </span>
+
+                    @if ($staff->achBankAccount->verification_status !== 'verified')
+                        <form method="POST" action="{{ route('admin.staff.ach-account.verify', $staff) }}">
+                            @csrf
+                            <button type="submit" class="text-sm font-medium text-indigo-600 hover:underline">
+                                {{ __('Verify with Stripe') }}
+                            </button>
+                        </form>
+                    @endif
                 </div>
             @endif
 

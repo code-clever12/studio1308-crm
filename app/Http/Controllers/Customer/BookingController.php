@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Customer;
 use App\Exceptions\BookingUnavailableException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Customer\BookingRequest;
+use App\Models\Appointment;
 use App\Models\Service;
 use App\Models\Staff;
 use App\Services\BookingService;
@@ -131,6 +132,53 @@ class BookingController extends Controller
         return redirect()->route('customer.appointments.index')
             ->with('status', 'Appointment requested! We will confirm shortly.')
             ->with('appointment_id', $appointment->id);
+    }
+
+    /**
+     * Shows the Stripe payment step for a pending appointment. Creates (or
+     * refreshes, if the tip changed) the PaymentIntent. If Stripe keys
+     * aren't configured yet, renders a clear "not connected" state instead
+     * of attempting — and failing — a real API call.
+     */
+    public function payment(Request $request, Appointment $appointment): View
+    {
+        $this->authorize('view', $appointment);
+        abort_unless($appointment->status === 'pending', 404);
+
+        $appointment->load('service', 'staff.user');
+
+        $tip = round($request->float('tip', 0), 2);
+        $stripeConfigured = filled(config('services.stripe.key')) && filled(config('services.stripe.secret'));
+
+        $clientSecret = null;
+
+        if ($stripeConfigured) {
+            $intent = $this->paymentService->createDepositPaymentIntent($appointment, $tip);
+            $clientSecret = $intent['client_secret'];
+        }
+
+        return view('customer.booking.payment', [
+            'appointment' => $appointment,
+            'breakdown' => $this->paymentService->calculateBreakdown($appointment->service, $tip),
+            'clientSecret' => $clientSecret,
+            'stripeKey' => config('services.stripe.key'),
+            'stripeConfigured' => $stripeConfigured,
+        ]);
+    }
+
+    /**
+     * Success page Stripe redirects back to after payment confirmation.
+     * The webhook (not this page) is the source of truth for actually
+     * marking the appointment confirmed — this is just immediate UX.
+     */
+    public function confirmation(Request $request, Appointment $appointment): View
+    {
+        $this->authorize('view', $appointment);
+
+        return view('customer.booking.confirmation', [
+            'appointment' => $appointment->fresh(['service', 'staff.user']),
+            'redirectStatus' => $request->query('redirect_status'),
+        ]);
     }
 
     /**

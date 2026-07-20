@@ -44,7 +44,47 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+/*
+|--------------------------------------------------------------------------
+| Stripe test helpers
+|--------------------------------------------------------------------------
+|
+| The real Stripe\StripeClient (bound in the container with a dummy test key
+| — see phpunit.xml) resolves real Service objects via magic __get(), which
+| Mockery cannot reliably intercept on a concrete class. So instead of mocking
+| StripeClient itself, mockStripeHttp() swaps Stripe's HTTP transport layer
+| (Stripe\ApiRequestor::setHttpClient) for a Mockery double — the real SDK
+| objects still run, but every network call is intercepted and answered with
+| a canned JSON response. Reset back to null after each test so a leftover
+| mock never leaks into an unrelated test.
+|
+| stripeWebhookSignature() reproduces Stripe's documented HMAC-SHA256 webhook
+| signing scheme offline, so signature verification can be tested without a
+| real Stripe account.
+|
+*/
+
+function mockStripeHttp(): \Mockery\MockInterface
 {
-    // ..
+    $client = Mockery::mock(\Stripe\HttpClient\ClientInterface::class);
+    \Stripe\ApiRequestor::setHttpClient($client);
+
+    return $client;
 }
+
+function stripeHttpResponse(array $body, int $status = 200): array
+{
+    return [json_encode($body), $status, []];
+}
+
+function stripeWebhookSignature(string $payload, string $secret, ?int $timestamp = null): string
+{
+    $timestamp ??= time();
+    $signature = hash_hmac('sha256', "{$timestamp}.{$payload}", $secret);
+
+    return "t={$timestamp},v1={$signature}";
+}
+
+afterEach(function () {
+    \Stripe\ApiRequestor::setHttpClient(null);
+});

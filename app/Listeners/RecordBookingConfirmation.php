@@ -6,9 +6,8 @@ use App\Events\PaymentSucceeded;
 use App\Services\NotificationService;
 
 /**
- * Confirms the appointment once its deposit payment succeeds. Not yet
- * triggered anywhere — PaymentSucceeded is dispatched by Step 8's Stripe
- * webhook handler, which doesn't exist until that step lands.
+ * Confirms the appointment once its deposit payment succeeds. Triggered by
+ * PaymentController's payment_intent.succeeded webhook handler.
  */
 class RecordBookingConfirmation
 {

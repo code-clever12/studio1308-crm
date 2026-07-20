@@ -8,12 +8,14 @@ use App\Models\ACHBankAccount;
 use App\Models\Service;
 use App\Models\Staff;
 use App\Models\User;
+use App\Services\ACHPayoutService;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use RuntimeException;
 
 class StaffController extends Controller
 {
@@ -141,6 +143,23 @@ class StaffController extends Controller
             ]
         );
 
-        return redirect()->route('admin.staff.edit', $staff)->with('status', 'Bank account saved. Verification is pending Stripe Connect integration (Step 8).');
+        return redirect()->route('admin.staff.edit', $staff)->with('status', 'Bank account saved. Click "Verify with Stripe" below to enable payouts.');
+    }
+
+    /**
+     * Creates (or reuses) the staff member's Stripe Connect account and
+     * attaches their saved bank details, so payouts can be initiated.
+     */
+    public function verifyAchAccount(Staff $staff, ACHPayoutService $achPayoutService): RedirectResponse
+    {
+        $this->authorize('update', $staff);
+
+        try {
+            $achPayoutService->verifyBankAccount($staff);
+        } catch (RuntimeException $e) {
+            return back()->withErrors(['ach' => $e->getMessage()]);
+        }
+
+        return redirect()->route('admin.staff.edit', $staff)->with('status', 'Bank account verified with Stripe — ready for payouts.');
     }
 }

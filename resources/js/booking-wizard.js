@@ -167,7 +167,9 @@ export default function bookingWizard(config) {
                     return;
                 }
 
-                window.location.href = this.urls.appointments;
+                const data = await response.json();
+                const paymentUrl = this.urls.payment.replace('__APPOINTMENT_ID__', data.appointment_id);
+                window.location.href = `${paymentUrl}?tip=${this.tipAmount}`;
             } catch (e) {
                 this.error = 'Something went wrong booking your appointment. Please try again.';
             } finally {

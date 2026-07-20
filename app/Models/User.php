@@ -29,6 +29,8 @@ class User extends Authenticatable
         'avatar',
         'timezone',
         'is_active',
+        'stripe_customer_id',
+        'stripe_payment_method_id',
     ];
 
     /**
@@ -39,6 +41,8 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'stripe_customer_id',
+        'stripe_payment_method_id',
     ];
 
     /**
