@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Stripe\StripeClient;
 
@@ -37,5 +38,12 @@ class AppServiceProvider extends ServiceProvider
 
         // Admins manage the whole platform: short-circuit every ability check.
         Gate::before(fn (User $user, string $ability) => $user->isAdmin() ? true : null);
+
+        // Generated URLs (password reset links, Stripe return_url, etc.) use
+        // https in production even if the request reaches PHP over plain
+        // http from a reverse proxy — see TRUSTED_PROXIES in bootstrap/app.php.
+        if ($this->app->isProduction()) {
+            URL::forceScheme('https');
+        }
     }
 }

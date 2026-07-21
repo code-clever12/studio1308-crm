@@ -10,3 +10,5 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::job(new MarkNoShowAppointments)->everyFiveMinutes();
+
+Schedule::command('backup:database')->dailyAt('02:00')->onOneServer();
