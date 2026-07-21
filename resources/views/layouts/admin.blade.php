@@ -26,15 +26,21 @@
                 </div>
 
                 <nav class="px-3 py-4 space-y-1">
-                    <a
-                        href="{{ route('admin.dashboard') }}"
-                        class="flex items-center px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('admin.dashboard') ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white' }}"
-                    >
-                        {{ __('Dashboard') }}
-                    </a>
+                    <x-admin-nav-link route="admin.dashboard">{{ __('Dashboard') }}</x-admin-nav-link>
+                    <x-admin-nav-link route="admin.appointments.index" active="admin.appointments.*">{{ __('Appointments') }}</x-admin-nav-link>
+                    <x-admin-nav-link route="admin.staff.index" active="admin.staff.*">{{ __('Staff') }}</x-admin-nav-link>
+                    <x-admin-nav-link route="admin.services.index" active="admin.services.*">{{ __('Services') }}</x-admin-nav-link>
+                    <x-admin-nav-link route="admin.customers.index" active="admin.customers.*">{{ __('Customers') }}</x-admin-nav-link>
+                    <x-admin-nav-link route="admin.forms.index" active="admin.forms.*">{{ __('Consent Forms') }}</x-admin-nav-link>
 
-                    {{-- Appointments, Services, Staff, Clients, Reports, Settings, etc.
-                         are added as their controllers/routes land in later build steps. --}}
+                    <p class="px-3 pt-4 pb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Reports') }}</p>
+                    <x-admin-nav-link route="admin.reports.commission">{{ __('Commission') }}</x-admin-nav-link>
+                    <x-admin-nav-link route="admin.reports.tips">{{ __('Tips') }}</x-admin-nav-link>
+                    <x-admin-nav-link route="admin.reports.tax">{{ __('Sales Tax') }}</x-admin-nav-link>
+
+                    <p class="px-3 pt-4 pb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Business') }}</p>
+                    <x-admin-nav-link route="admin.payouts.index">{{ __('Payouts') }}</x-admin-nav-link>
+                    <x-admin-nav-link route="admin.settings.edit">{{ __('Settings') }}</x-admin-nav-link>
                 </nav>
             </aside>
 
