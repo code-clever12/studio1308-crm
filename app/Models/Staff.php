@@ -24,15 +24,7 @@ class Staff extends Model
         'commission_rate',
         'status',
         'hire_date',
-        'bank_account_routing_number',
-        'bank_account_number',
-        'bank_account_holder_name',
         'stripe_connect_account_id',
-    ];
-
-    protected $hidden = [
-        'bank_account_routing_number',
-        'bank_account_number',
     ];
 
     protected function casts(): array
@@ -40,8 +32,6 @@ class Staff extends Model
         return [
             'commission_rate' => 'decimal:2',
             'hire_date' => 'date',
-            'bank_account_routing_number' => 'encrypted',
-            'bank_account_number' => 'encrypted',
         ];
     }
 

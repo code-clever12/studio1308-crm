@@ -1,59 +1,85 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Ritual Barber Studio
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A complete Salon & Appointment Booking Management Platform for a single, independent USA salon — built with Laravel 12, Blade, Tailwind CSS v4, Alpine.js, and Stripe.
 
-## About Laravel
+Customers browse services and staff, book multi-step appointments with real-time availability, pay a deposit (plus an optional tip) by card, and get a confirmation email with a calendar invite. Admins run the whole business from a dashboard: staff schedules, services, a drag-and-drop appointment calendar, consent forms, sales tax and commission reports, and ACH payouts to staff.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## USA-specific features
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **Tipping** at checkout (15% / 18% / 20% / custom), tracked per staff member
+- **Sales tax** calculated per the salon's configured state rate
+- **No-show fees** auto-charged to the card on file 30 minutes after a missed appointment, with auto-blocking after 3 no-shows
+- **ACH payouts** to staff (commission + tips combined) via Stripe Connect
+- **Stripe** for deposits, tips, refunds, and payouts — PCI DSS scope stays minimal since card data never touches this app's server (Stripe Elements handles it directly)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Tech stack
 
-## Learning Laravel
+- Laravel 12, Blade, Laravel Breeze (auth)
+- Tailwind CSS v4 (separate `app.css`/`admin.css` builds for customer vs. admin) + Alpine.js
+- MySQL/MariaDB, Stripe (`stripe/stripe-php`), Pest for testing
+- Sentry for error tracking (optional, off unless configured)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## Local setup
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Requires PHP 8.2+, Composer, Node 20+, and MySQL/MariaDB.
 
-## Laravel Sponsors
+```bash
+composer install
+cp .env.example .env
+php artisan key:generate
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Create a database matching `.env`'s `DB_DATABASE` (`studio1308` by default), then:
 
-### Premium Partners
+```bash
+php artisan migrate --seed
+npm install
+composer run dev
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+`composer run dev` runs the PHP dev server, a queue listener, and the Vite dev server together. Visit `http://localhost:8000`.
 
-## Contributing
+### Demo accounts
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+All seeded with the password `password`:
 
-## Code of Conduct
+| Role | Email |
+|---|---|
+| Admin | `admin@ritualsalon.test` |
+| Staff | `jordan@ritualsalon.test` (and `morgan`/`casey`/`riley`/`sam@ritualsalon.test`) |
+| Customer | `customer@ritualsalon.test` |
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Connecting real services (optional for local dev)
 
-## Security Vulnerabilities
+The app runs fully without these — payment and email features degrade to a clear "not connected" state or write to a local log file instead of failing:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+- **Stripe**: set `STRIPE_KEY`/`STRIPE_SECRET`/`STRIPE_WEBHOOK_SECRET` in `.env` (test keys are fine). Without them, the payment page shows a "not connected yet" message and the admin "Verify with Stripe" action for staff payouts does the same.
+- **Email**: `MAIL_MAILER=log` (the default) writes emails to `storage/logs/laravel.log` instead of sending them. Switch to `smtp`/`mailgun`/`ses`/`postmark` with real credentials to actually send.
 
-## License
+## Testing
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+php artisan test
+./vendor/bin/pint --test   # code style check
+```
+
+170+ Pest tests cover booking/overlap prevention, payments (mocked Stripe HTTP calls + offline webhook signature verification), notifications/email, authorization, and a full end-to-end booking journey.
+
+## Project structure
+
+- `app/Services/` — business logic (slot generation, booking, payments, tipping, sales tax, no-shows, ACH payouts, commissions, cancellations, notifications)
+- `app/Http/Controllers/Admin/` and `Customer/` — role-scoped controllers
+- `app/Mail/` + `resources/views/emails/` — transactional email templates
+- `resources/views/customer/` and `admin/` — Blade views, with separate `app.css`/`admin.css` Tailwind builds
+- `database/migrations/`, `factories/`, `seeders/` — schema and demo data
+- `tests/Feature/` — the full Pest suite
+
+## Documentation
+
+- [`docs/PROJECT_SPEC.md`](docs/PROJECT_SPEC.md) — the original full specification this app was built from
+- [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) — manual deployment runbook (server setup, environment checklist, Supervisor, cron, HTTPS, backups)
+- [`docs/ADMIN_GUIDE.md`](docs/ADMIN_GUIDE.md) — how to run the salon day-to-day from the admin dashboard
+- [`docs/CUSTOMER_FAQ.md`](docs/CUSTOMER_FAQ.md) — customer-facing booking/payment/cancellation questions
+- [`docs/SECURITY_AUDIT.md`](docs/SECURITY_AUDIT.md) — pre-launch security review and fixes
+- [`docs/PERFORMANCE.md`](docs/PERFORMANCE.md) — query counts, existing optimizations, and what real load testing would need
+- [`docs/LAUNCH_CHECKLIST.md`](docs/LAUNCH_CHECKLIST.md) — what's done vs. what's left before going live

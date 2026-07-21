@@ -27,6 +27,16 @@ Route::get('/', function () {
 Route::get('/dashboard', function (Request $request) {
     $user = $request->user();
 
+    // Admins have a real dashboard at /admin/dashboard — redirect there
+    // instead of showing the generic placeholder below (meant for staff,
+    // who don't have a dedicated dashboard yet). Without this, an admin
+    // landing here via a stale bookmark or a login redirect's "intended
+    // URL" would see a page that incorrectly claims "You're logged in as
+    // staff."
+    if ($user->isAdmin()) {
+        return redirect()->route('admin.dashboard');
+    }
+
     if (! $user->isCustomer()) {
         return view('dashboard');
     }
@@ -57,14 +67,17 @@ Route::middleware('auth')->group(function () {
 | Customer Routes
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'verified', 'role:customer'])->prefix('customer')->name('customer.')->group(function () {
+Route::middleware(['auth', 'verified', 'role:customer', 'throttle:60,1'])->prefix('customer')->name('customer.')->group(function () {
     Route::get('/browse', [BrowseController::class, 'index'])->name('browse');
 
     Route::get('/booking', [BookingController::class, 'create'])->name('booking.create');
     Route::get('/booking/slots', [BookingController::class, 'slots'])->name('booking.slots');
     Route::get('/booking/breakdown', [BookingController::class, 'breakdown'])->name('booking.breakdown');
     Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
-    Route::get('/booking/{appointment}/payment', [BookingController::class, 'payment'])->name('booking.payment');
+    // Tighter cap than the group default: this hits Stripe's API on every
+    // GET (creates/updates a PaymentIntent), so it's a real cost/DoS vector
+    // against the Stripe account, not just this server.
+    Route::get('/booking/{appointment}/payment', [BookingController::class, 'payment'])->middleware('throttle:10,1')->name('booking.payment');
     Route::get('/booking/{appointment}/confirmation', [BookingController::class, 'confirmation'])->name('booking.confirmation');
     Route::post('/booking/waitlist', [BookingController::class, 'joinWaitlist'])->name('booking.waitlist');
 
@@ -82,7 +95,7 @@ Route::middleware(['auth', 'verified', 'role:customer'])->prefix('customer')->na
 | Admin Routes
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'verified', 'role:admin', 'throttle:60,1'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
     Route::resource('appointments', AdminAppointmentController::class)->except(['show', 'edit']);
@@ -118,7 +131,10 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
 });
 
-Route::post('/webhooks/stripe', [PaymentController::class, 'webhook'])->name('webhooks.stripe');
-Route::post('/webhooks/stripe/payouts', [PaymentController::class, 'payoutWebhook'])->name('webhooks.stripe.payouts');
+// Unauthenticated by design (Stripe calls these directly) — signature
+// verification inside PaymentController rejects anything not genuinely from
+// Stripe, but a generous throttle still guards against basic request floods.
+Route::post('/webhooks/stripe', [PaymentController::class, 'webhook'])->middleware('throttle:120,1')->name('webhooks.stripe');
+Route::post('/webhooks/stripe/payouts', [PaymentController::class, 'payoutWebhook'])->middleware('throttle:120,1')->name('webhooks.stripe.payouts');
 
 require __DIR__.'/auth.php';

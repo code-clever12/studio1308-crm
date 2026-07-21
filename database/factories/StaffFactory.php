@@ -20,9 +20,6 @@ class StaffFactory extends Factory
             'commission_rate' => fake()->randomElement([15, 20, 25, 30]),
             'status' => 'active',
             'hire_date' => fake()->dateTimeBetween('-3 years', '-1 month'),
-            'bank_account_routing_number' => null,
-            'bank_account_number' => null,
-            'bank_account_holder_name' => null,
             'stripe_connect_account_id' => null,
         ];
     }

@@ -44,6 +44,7 @@ File storage stays on the local disk (`FILESYSTEM_DISK=local`) rather than S3, b
 | `APP_URL` | your real domain, `https://...` |
 | `DB_*` | real MySQL/MariaDB credentials |
 | `TRUSTED_PROXIES` | your reverse proxy/load balancer's IP(s), or blank if PHP-FPM receives requests directly |
+| `SESSION_SECURE_COOKIE` | `true` — the session cookie only gets the `Secure` flag if this is set; forcing https on generated URLs (already done) doesn't set it for you |
 | `SESSION_DRIVER` / `CACHE_STORE` / `QUEUE_CONNECTION` | `database` works fine at this app's scale with zero extra infrastructure; switch to `redis` later only if you actually need the extra throughput (see `.env.example`'s comments) |
 | `MAIL_MAILER` | `smtp`, `mailgun`, `ses`, or `postmark` with real credentials — `log` (the dev default) silently writes emails to a log file instead of sending them |
 | `STRIPE_KEY` / `STRIPE_SECRET` / `STRIPE_WEBHOOK_SECRET` | real Stripe keys (test or live). Until these are set, the payment page and ACH verification both show a clear "not connected yet" state rather than erroring |
