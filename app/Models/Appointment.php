@@ -128,4 +128,48 @@ class Appointment extends Model
 
         return 'https://calendar.google.com/calendar/render?'.http_build_query($params);
     }
+
+    /**
+     * Raw iCalendar (.ics) file content for the booking confirmation email
+     * attachment. Uses floating local time (no UTC/TZID conversion) since
+     * the rest of the app treats appointment_date/start_time/end_time as
+     * plain salon-local wall-clock values with no timezone handling —
+     * matching that here avoids a mismatch with what customers see on-screen.
+     */
+    public function toIcsContent(): string
+    {
+        $start = Carbon::parse($this->appointment_date->toDateString().' '.$this->start_time);
+        $end = Carbon::parse($this->appointment_date->toDateString().' '.$this->end_time);
+        $salon = Salon::query()->first();
+
+        $location = $salon
+            ? trim("{$salon->address}, {$salon->city}, {$salon->state} {$salon->zip_code}", ' ,')
+            : '';
+
+        $lines = [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'PRODID:-//'.config('app.name').'//Booking//EN',
+            'CALSCALE:GREGORIAN',
+            'METHOD:PUBLISH',
+            'BEGIN:VEVENT',
+            'UID:appointment-'.$this->id.'@'.(parse_url((string) config('app.url'), PHP_URL_HOST) ?: 'ritualbarberstudio.test'),
+            'DTSTAMP:'.now()->format('Ymd\THis'),
+            'DTSTART:'.$start->format('Ymd\THis'),
+            'DTEND:'.$end->format('Ymd\THis'),
+            'SUMMARY:'.$this->icsEscape($this->service->name.' at '.config('app.name')),
+            'DESCRIPTION:'.$this->icsEscape('Appointment for '.$this->service->name.($this->staff ? ' with '.$this->staff->user->name : '')),
+            'LOCATION:'.$this->icsEscape($location),
+            'STATUS:CONFIRMED',
+            'END:VEVENT',
+            'END:VCALENDAR',
+        ];
+
+        return implode("\r\n", $lines)."\r\n";
+    }
+
+    private function icsEscape(string $value): string
+    {
+        return str_replace(['\\', ',', ';', "\n"], ['\\\\', '\\,', '\\;', '\\n'], $value);
+    }
 }

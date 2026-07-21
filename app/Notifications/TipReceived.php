@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Mail\TipReceivedMail;
 use App\Models\Tip;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -9,7 +10,6 @@ use Illuminate\Notifications\Notification;
 
 /**
  * Sent to a staff member when they receive a tip.
- * Delivered via the database channel for now; Step 9 adds mail delivery.
  */
 class TipReceived extends Notification implements ShouldQueue
 {
@@ -24,7 +24,12 @@ class TipReceived extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', 'mail'];
+    }
+
+    public function toMail(object $notifiable): TipReceivedMail
+    {
+        return (new TipReceivedMail($this->tip))->to($notifiable->email);
     }
 
     /**

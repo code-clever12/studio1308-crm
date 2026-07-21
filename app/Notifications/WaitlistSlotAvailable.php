@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Mail\WaitlistNotificationMail;
 use App\Models\Waitlist;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -9,7 +10,6 @@ use Illuminate\Notifications\Notification;
 
 /**
  * Sent when a slot matching a customer's waitlist request opens up.
- * Delivered via the database channel for now; Step 9 adds mail delivery.
  */
 class WaitlistSlotAvailable extends Notification implements ShouldQueue
 {
@@ -24,7 +24,12 @@ class WaitlistSlotAvailable extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', 'mail'];
+    }
+
+    public function toMail(object $notifiable): WaitlistNotificationMail
+    {
+        return (new WaitlistNotificationMail($this->waitlist))->to($notifiable->email);
     }
 
     /**

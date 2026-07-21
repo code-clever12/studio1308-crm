@@ -20,8 +20,8 @@ use App\Notifications\WaitlistSlotAvailable;
 /**
  * Thin wrapper around dispatching the app's Notification classes (see
  * app/Notifications/). Each notification is queued automatically
- * (ShouldQueue) and currently delivers via the database channel only;
- * Step 9 adds mail delivery to the same classes.
+ * (ShouldQueue) and delivers via both the database channel (in-app alerts)
+ * and mail (real Mailable/Blade templates in app/Mail + resources/views/emails).
  */
 class NotificationService
 {

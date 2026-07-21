@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Mail\PayoutFailedMail;
 use App\Models\ACHPayout;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -9,7 +10,6 @@ use Illuminate\Notifications\Notification;
 
 /**
  * Sent to admin users when a Stripe ACH payout fails.
- * Delivered via the database channel for now; Step 9 adds mail delivery.
  */
 class PayoutFailed extends Notification implements ShouldQueue
 {
@@ -24,7 +24,12 @@ class PayoutFailed extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', 'mail'];
+    }
+
+    public function toMail(object $notifiable): PayoutFailedMail
+    {
+        return (new PayoutFailedMail($this->payout))->to($notifiable->email);
     }
 
     /**

@@ -2,13 +2,13 @@
 
 namespace App\Notifications;
 
+use App\Mail\AdminDailySummaryMail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 
 /**
  * Sent to admin users with today's appointments/no-shows/cancellations/revenue.
- * Delivered via the database channel for now; Step 9 adds mail delivery.
  */
 class AdminDailySummary extends Notification implements ShouldQueue
 {
@@ -26,7 +26,12 @@ class AdminDailySummary extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', 'mail'];
+    }
+
+    public function toMail(object $notifiable): AdminDailySummaryMail
+    {
+        return (new AdminDailySummaryMail($this->stats))->to($notifiable->email);
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Mail\BookingConfirmationMail;
 use App\Models\Appointment;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -9,8 +10,6 @@ use Illuminate\Notifications\Notification;
 
 /**
  * Sent to the customer once their deposit payment succeeds.
- * Delivered via the database channel for now; Step 9 adds a toMail()
- * implementation with the full Mailable/Blade receipt template.
  */
 class BookingConfirmed extends Notification implements ShouldQueue
 {
@@ -25,7 +24,12 @@ class BookingConfirmed extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', 'mail'];
+    }
+
+    public function toMail(object $notifiable): BookingConfirmationMail
+    {
+        return (new BookingConfirmationMail($this->appointment))->to($notifiable->email);
     }
 
     /**

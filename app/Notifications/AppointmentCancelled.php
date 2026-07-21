@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Mail\CancellationNoticeMail;
 use App\Models\Appointment;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -9,7 +10,6 @@ use Illuminate\Notifications\Notification;
 
 /**
  * Sent to the customer when their appointment is cancelled, with refund details.
- * Delivered via the database channel for now; Step 9 adds mail delivery.
  */
 class AppointmentCancelled extends Notification implements ShouldQueue
 {
@@ -24,7 +24,12 @@ class AppointmentCancelled extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', 'mail'];
+    }
+
+    public function toMail(object $notifiable): CancellationNoticeMail
+    {
+        return (new CancellationNoticeMail($this->appointment))->to($notifiable->email);
     }
 
     /**

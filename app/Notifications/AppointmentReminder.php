@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Mail\AppointmentReminderMail;
 use App\Models\Appointment;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -9,7 +10,6 @@ use Illuminate\Notifications\Notification;
 
 /**
  * Sent to the customer ~24 hours before their appointment.
- * Delivered via the database channel for now; Step 9 adds mail delivery.
  */
 class AppointmentReminder extends Notification implements ShouldQueue
 {
@@ -24,7 +24,12 @@ class AppointmentReminder extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', 'mail'];
+    }
+
+    public function toMail(object $notifiable): AppointmentReminderMail
+    {
+        return (new AppointmentReminderMail($this->appointment))->to($notifiable->email);
     }
 
     /**
