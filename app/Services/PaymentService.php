@@ -18,9 +18,7 @@ use Stripe\StripeClient;
  */
 class PaymentService
 {
-    public function __construct(private readonly StripeClient $stripe)
-    {
-    }
+    public function __construct(private readonly StripeClient $stripe) {}
 
     /**
      * Deposit amount owed for a service: the service's own deposit_amount if

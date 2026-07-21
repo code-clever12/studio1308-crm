@@ -16,7 +16,5 @@ class PaymentSucceeded
 {
     use Dispatchable, SerializesModels;
 
-    public function __construct(public Appointment $appointment, public Payment $payment)
-    {
-    }
+    public function __construct(public Appointment $appointment, public Payment $payment) {}
 }

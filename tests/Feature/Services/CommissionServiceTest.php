@@ -52,3 +52,26 @@ it('builds a commission report totalling revenue and commission for a date range
         ->and($report['total_revenue'])->toBe(200.0)
         ->and($report['total_commission'])->toBe(50.0);
 });
+
+it('totals commission for a staff member across a date range, ignoring non-completed appointments', function () {
+    $staff = Staff::factory()->create(['commission_rate' => 20]);
+    $today = Carbon::today();
+
+    Appointment::factory()->create([
+        'staff_id' => $staff->id,
+        'service_price' => 100,
+        'status' => 'completed',
+        'appointment_date' => $today->toDateString(),
+    ]);
+
+    Appointment::factory()->create([
+        'staff_id' => $staff->id,
+        'service_price' => 300,
+        'status' => 'pending',
+        'appointment_date' => $today->toDateString(),
+    ]);
+
+    $total = $this->commissionService->totalCommissionForStaff($staff, $today->copy()->subDay(), $today->copy()->addDay());
+
+    expect($total)->toBe(20.0);
+});

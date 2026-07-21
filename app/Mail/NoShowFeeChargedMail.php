@@ -14,9 +14,7 @@ class NoShowFeeChargedMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public Appointment $appointment, public float $feeAmount)
-    {
-    }
+    public function __construct(public Appointment $appointment, public float $feeAmount) {}
 
     public function envelope(): Envelope
     {

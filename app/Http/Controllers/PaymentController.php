@@ -24,8 +24,7 @@ class PaymentController extends Controller
     public function __construct(
         private readonly TipService $tipService,
         private readonly NotificationService $notificationService,
-    ) {
-    }
+    ) {}
 
     /**
      * payment_intent.succeeded, charge.refunded.

@@ -4,9 +4,11 @@ use App\Models\ACHPayout;
 use App\Models\Appointment;
 use App\Models\Payment;
 use App\Models\User;
+use App\Notifications\PayoutFailed;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Testing\TestResponse;
 
-function postStripeWebhook(string $route, array $payload, ?string $secret = null): \Illuminate\Testing\TestResponse
+function postStripeWebhook(string $route, array $payload, ?string $secret = null): TestResponse
 {
     $body = json_encode($payload);
     $secret ??= config('services.stripe.webhook_secret');
@@ -137,5 +139,5 @@ it('marks an ACH payout failed and alerts admins on a payout.failed webhook', fu
     expect($payout->fresh()->status)->toBe('failed')
         ->and($payout->fresh()->failure_reason)->toBe('Account closed');
 
-    Notification::assertSentTo($admin, App\Notifications\PayoutFailed::class);
+    Notification::assertSentTo($admin, PayoutFailed::class);
 });

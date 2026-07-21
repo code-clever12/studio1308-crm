@@ -10,7 +10,5 @@ class AppointmentCancelled
 {
     use Dispatchable, SerializesModels;
 
-    public function __construct(public Appointment $appointment)
-    {
-    }
+    public function __construct(public Appointment $appointment) {}
 }

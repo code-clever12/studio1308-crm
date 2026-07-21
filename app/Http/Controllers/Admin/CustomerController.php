@@ -14,9 +14,7 @@ use Illuminate\View\View;
  */
 class CustomerController extends Controller
 {
-    public function __construct(private readonly NoShowFeeService $noShowFeeService)
-    {
-    }
+    public function __construct(private readonly NoShowFeeService $noShowFeeService) {}
 
     public function index(): View
     {

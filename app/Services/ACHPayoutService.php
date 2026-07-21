@@ -17,8 +17,7 @@ class ACHPayoutService
         private readonly CommissionService $commissionService,
         private readonly TipService $tipService,
         private readonly StripeClient $stripe,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array{commission: float, tips: float, total: float}

@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Appointment;
 use App\Models\Salon;
 use App\Models\Service;
 use App\Services\SalesTaxService;
@@ -22,7 +23,7 @@ it('returns zero tax for non-taxable services', function () {
 });
 
 it('records a sales tax transaction linked to the appointment', function () {
-    $appointment = App\Models\Appointment::factory()->create();
+    $appointment = Appointment::factory()->create();
 
     $transaction = $this->salesTaxService->recordTaxTransaction($appointment, 100, 8.88, $this->salon);
 
@@ -33,7 +34,7 @@ it('records a sales tax transaction linked to the appointment', function () {
 });
 
 it('skips recording a transaction when the tax amount is zero', function () {
-    $appointment = App\Models\Appointment::factory()->create();
+    $appointment = Appointment::factory()->create();
 
     $transaction = $this->salesTaxService->recordTaxTransaction($appointment, 100, 0, $this->salon);
 

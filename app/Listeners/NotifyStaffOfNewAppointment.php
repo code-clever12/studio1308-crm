@@ -7,9 +7,7 @@ use App\Services\NotificationService;
 
 class NotifyStaffOfNewAppointment
 {
-    public function __construct(private readonly NotificationService $notificationService)
-    {
-    }
+    public function __construct(private readonly NotificationService $notificationService) {}
 
     public function handle(AppointmentBooked $event): void
     {

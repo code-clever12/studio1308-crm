@@ -15,9 +15,7 @@ class WaitlistSlotAvailable extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(public Waitlist $waitlist)
-    {
-    }
+    public function __construct(public Waitlist $waitlist) {}
 
     /**
      * @return array<int, string>

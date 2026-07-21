@@ -1,13 +1,10 @@
 <?php
 
 use App\Mail\AdminDailySummaryMail;
-use App\Mail\AppointmentReminderMail;
 use App\Mail\BookingConfirmationMail;
 use App\Mail\CancellationNoticeMail;
 use App\Mail\NoShowFeeChargedMail;
 use App\Mail\PayoutFailedMail;
-use App\Mail\StaffAssignedMail;
-use App\Mail\TipReceivedMail;
 use App\Mail\WaitlistNotificationMail;
 use App\Models\ACHPayout;
 use App\Models\Appointment;

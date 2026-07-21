@@ -2,6 +2,7 @@
 
 use App\Models\Appointment;
 use App\Models\Staff;
+use App\Models\Tip;
 use App\Models\User;
 use App\Services\TipService;
 
@@ -35,13 +36,13 @@ it('records a tip and updates the appointment tip_amount', function () {
 it('sums completed tips for a staff member within a date range', function () {
     $staff = Staff::factory()->create();
 
-    \App\Models\Tip::factory()->count(3)->create([
+    Tip::factory()->count(3)->create([
         'staff_id' => $staff->id,
         'status' => 'completed',
         'amount' => 10,
     ]);
 
-    \App\Models\Tip::factory()->create([
+    Tip::factory()->create([
         'staff_id' => $staff->id,
         'status' => 'failed',
         'amount' => 999,

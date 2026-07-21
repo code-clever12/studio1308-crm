@@ -11,9 +11,7 @@ use App\Services\NotificationService;
  */
 class RecordBookingConfirmation
 {
-    public function __construct(private readonly NotificationService $notificationService)
-    {
-    }
+    public function __construct(private readonly NotificationService $notificationService) {}
 
     public function handle(PaymentSucceeded $event): void
     {

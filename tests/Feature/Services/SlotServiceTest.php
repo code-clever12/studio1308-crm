@@ -88,3 +88,43 @@ it('returns no slots on a day off', function () {
 
     expect($this->slotService->getAvailableSlots($this->staff, nextMonday(), $this->service))->toBe([]);
 });
+
+it('returns the busy intervals for existing pending/confirmed appointments on a date', function () {
+    Appointment::factory()->create([
+        'staff_id' => $this->staff->id,
+        'appointment_date' => nextMonday(),
+        'start_time' => '09:00:00',
+        'end_time' => '10:15:00',
+        'status' => 'confirmed',
+    ]);
+
+    Appointment::factory()->create([
+        'staff_id' => $this->staff->id,
+        'appointment_date' => nextMonday(),
+        'start_time' => '11:00:00',
+        'end_time' => '12:00:00',
+        'status' => 'cancelled',
+    ]);
+
+    $busy = $this->slotService->getBusyIntervals($this->staff, nextMonday());
+
+    expect($busy)->toHaveCount(1)
+        ->and($busy->first()['start']->format('H:i'))->toBe('09:00')
+        ->and($busy->first()['end']->format('H:i'))->toBe('10:15');
+});
+
+it('invalidates the cached busy intervals so a newly booked appointment is reflected', function () {
+    $this->slotService->getBusyIntervals($this->staff, nextMonday());
+
+    Appointment::factory()->create([
+        'staff_id' => $this->staff->id,
+        'appointment_date' => nextMonday(),
+        'start_time' => '09:00:00',
+        'end_time' => '10:15:00',
+        'status' => 'confirmed',
+    ]);
+
+    $this->slotService->invalidate($this->staff, nextMonday());
+
+    expect($this->slotService->getBusyIntervals($this->staff, nextMonday()))->toHaveCount(1);
+});

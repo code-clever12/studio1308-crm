@@ -15,9 +15,7 @@ class TipReceived extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(public Tip $tip)
-    {
-    }
+    public function __construct(public Tip $tip) {}
 
     /**
      * @return array<int, string>

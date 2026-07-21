@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\ACHBankAccount;
+use App\Models\ACHPayout;
 use App\Models\Appointment;
 use App\Models\Staff;
 use App\Models\Tip;
@@ -105,7 +106,7 @@ it('marks the bank account failed when Stripe rejects the external account', fun
 
 it('initiates a Stripe transfer for an in-transit payout', function () {
     $this->staff->update(['stripe_connect_account_id' => 'acct_test123']);
-    $payout = App\Models\ACHPayout::factory()->create([
+    $payout = ACHPayout::factory()->create([
         'staff_id' => $this->staff->id,
         'status' => 'pending',
         'amount' => 150,
@@ -127,7 +128,7 @@ it('initiates a Stripe transfer for an in-transit payout', function () {
 });
 
 it('refuses to initiate a transfer without a Stripe Connect account', function () {
-    $payout = App\Models\ACHPayout::factory()->create(['staff_id' => $this->staff->id, 'status' => 'pending']);
+    $payout = ACHPayout::factory()->create(['staff_id' => $this->staff->id, 'status' => 'pending']);
 
     $this->achPayoutService->initiateTransfer($payout);
 })->throws(RuntimeException::class);

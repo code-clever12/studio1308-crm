@@ -20,8 +20,7 @@ class BookingService
     public function __construct(
         private readonly SlotService $slotService,
         private readonly PaymentService $paymentService,
-    ) {
-    }
+    ) {}
 
     /**
      * Book an appointment for a customer, validating availability and business

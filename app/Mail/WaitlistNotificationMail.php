@@ -14,9 +14,7 @@ class WaitlistNotificationMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public Waitlist $waitlist)
-    {
-    }
+    public function __construct(public Waitlist $waitlist) {}
 
     public function envelope(): Envelope
     {

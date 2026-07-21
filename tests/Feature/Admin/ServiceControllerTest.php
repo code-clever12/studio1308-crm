@@ -58,3 +58,13 @@ it('deactivates rather than hard-deletes a service on destroy', function () {
     expect($service->fresh()->is_active)->toBeFalse();
     $this->assertDatabaseHas('services', ['id' => $service->id]);
 });
+
+it('blocks a non-admin from managing services', function () {
+    $customer = User::factory()->create(['role' => 'customer']);
+    $service = Service::factory()->create(['category_id' => $this->category->id]);
+
+    $this->actingAs($customer)->get(route('admin.services.index'))->assertForbidden();
+    $this->actingAs($customer)->post(route('admin.services.store'), [])->assertForbidden();
+    $this->actingAs($customer)->put(route('admin.services.update', $service), [])->assertForbidden();
+    $this->actingAs($customer)->delete(route('admin.services.destroy', $service))->assertForbidden();
+});

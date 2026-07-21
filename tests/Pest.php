@@ -1,6 +1,9 @@
 <?php
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Mockery\MockInterface;
+use Stripe\ApiRequestor;
+use Stripe\HttpClient\ClientInterface;
 use Tests\TestCase;
 
 /*
@@ -64,10 +67,10 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function mockStripeHttp(): \Mockery\MockInterface
+function mockStripeHttp(): MockInterface
 {
-    $client = Mockery::mock(\Stripe\HttpClient\ClientInterface::class);
-    \Stripe\ApiRequestor::setHttpClient($client);
+    $client = Mockery::mock(ClientInterface::class);
+    ApiRequestor::setHttpClient($client);
 
     return $client;
 }
@@ -86,5 +89,5 @@ function stripeWebhookSignature(string $payload, string $secret, ?int $timestamp
 }
 
 afterEach(function () {
-    \Stripe\ApiRequestor::setHttpClient(null);
+    ApiRequestor::setHttpClient(null);
 });

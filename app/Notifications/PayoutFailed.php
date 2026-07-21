@@ -15,9 +15,7 @@ class PayoutFailed extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(public ACHPayout $payout)
-    {
-    }
+    public function __construct(public ACHPayout $payout) {}
 
     /**
      * @return array<int, string>

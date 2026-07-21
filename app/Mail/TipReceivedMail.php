@@ -14,9 +14,7 @@ class TipReceivedMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public Tip $tip)
-    {
-    }
+    public function __construct(public Tip $tip) {}
 
     public function envelope(): Envelope
     {

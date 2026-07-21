@@ -16,8 +16,7 @@ class AppointmentController extends Controller
     public function __construct(
         private readonly CancellationService $cancellationService,
         private readonly SlotService $slotService,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request): View
     {

@@ -7,9 +7,7 @@ use App\Services\NotificationService;
 
 class SendCancellationNotification
 {
-    public function __construct(private readonly NotificationService $notificationService)
-    {
-    }
+    public function __construct(private readonly NotificationService $notificationService) {}
 
     public function handle(AppointmentCancelled $event): void
     {

@@ -15,9 +15,7 @@ class NoShowFeeCharged extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(public Appointment $appointment, public float $feeAmount)
-    {
-    }
+    public function __construct(public Appointment $appointment, public float $feeAmount) {}
 
     /**
      * @return array<int, string>

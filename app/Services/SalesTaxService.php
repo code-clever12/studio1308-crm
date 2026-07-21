@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Models\Appointment;
-use App\Models\Salon;
 use App\Models\SalesTaxTransaction;
+use App\Models\Salon;
 use App\Models\Service;
 use Carbon\CarbonInterface;
 

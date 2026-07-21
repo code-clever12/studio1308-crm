@@ -3,6 +3,8 @@
 use App\Jobs\ChargeNoShowFee;
 use App\Jobs\MarkNoShowAppointments;
 use App\Models\Appointment;
+use App\Services\NoShowFeeService;
+use App\Services\NotificationService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Queue;
 
@@ -23,7 +25,7 @@ it('marks eligible appointments as no-shows and queues the fee charge', function
         'status' => 'confirmed',
     ]);
 
-    (new MarkNoShowAppointments)->handle(app(\App\Services\NoShowFeeService::class));
+    (new MarkNoShowAppointments)->handle(app(NoShowFeeService::class));
 
     expect($appointment->fresh()->status)->toBe('no_show')
         ->and($notEligible->fresh()->status)->toBe('confirmed');
@@ -35,8 +37,8 @@ it('logs and exits cleanly when charging the no-show fee since Stripe is not yet
     $appointment = Appointment::factory()->create(['status' => 'no_show']);
 
     (new ChargeNoShowFee($appointment))->handle(
-        app(\App\Services\NoShowFeeService::class),
-        app(\App\Services\NotificationService::class),
+        app(NoShowFeeService::class),
+        app(NotificationService::class),
     );
 
     expect($appointment->fresh()->no_show_fee_charged)->toBeFalse();

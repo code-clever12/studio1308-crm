@@ -1,8 +1,10 @@
 <?php
 
 use App\Jobs\ProcessACHPayouts;
+use App\Jobs\SyncStripePaymentStatus;
 use App\Models\ACHBankAccount;
 use App\Models\Appointment;
+use App\Models\Payment;
 use App\Models\Staff;
 use App\Services\ACHPayoutService;
 use Carbon\Carbon;
@@ -30,7 +32,7 @@ it('creates a pending payout for each verified staff member with earnings', func
 });
 
 it('throws for the stubbed Stripe payment status sync pending Step 8', function () {
-    $payment = App\Models\Payment::factory()->create();
+    $payment = Payment::factory()->create();
 
-    (new App\Jobs\SyncStripePaymentStatus($payment))->handle();
+    (new SyncStripePaymentStatus($payment))->handle();
 })->throws(RuntimeException::class);

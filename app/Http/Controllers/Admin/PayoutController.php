@@ -17,9 +17,7 @@ use Illuminate\View\View;
  */
 class PayoutController extends Controller
 {
-    public function __construct(private readonly ACHPayoutService $achPayoutService)
-    {
-    }
+    public function __construct(private readonly ACHPayoutService $achPayoutService) {}
 
     public function index(): View
     {

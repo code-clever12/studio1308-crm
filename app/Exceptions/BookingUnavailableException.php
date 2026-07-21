@@ -10,6 +10,4 @@ use RuntimeException;
  * assigned to the service, etc.). Callers should catch this to offer the
  * customer a waitlist spot instead of a generic error.
  */
-class BookingUnavailableException extends RuntimeException
-{
-}
+class BookingUnavailableException extends RuntimeException {}

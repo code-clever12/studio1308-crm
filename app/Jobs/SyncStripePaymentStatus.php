@@ -16,9 +16,7 @@ class SyncStripePaymentStatus implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(public Payment $payment)
-    {
-    }
+    public function __construct(public Payment $payment) {}
 
     public function handle(): void
     {

@@ -12,9 +12,7 @@ use App\Services\NotificationService;
  */
 class NotifyMatchingWaitlist
 {
-    public function __construct(private readonly NotificationService $notificationService)
-    {
-    }
+    public function __construct(private readonly NotificationService $notificationService) {}
 
     public function handle(AppointmentCancelled $event): void
     {

@@ -19,8 +19,7 @@ class ReportController extends Controller
     public function __construct(
         private readonly CommissionService $commissionService,
         private readonly SalesTaxService $salesTaxService,
-    ) {
-    }
+    ) {}
 
     public function commission(Request $request): View
     {

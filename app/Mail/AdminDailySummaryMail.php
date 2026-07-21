@@ -16,9 +16,7 @@ class AdminDailySummaryMail extends Mailable
     /**
      * @param  array{date: string, appointments_count: int, no_shows_count: int, cancellations_count: int, revenue: float}  $stats
      */
-    public function __construct(public array $stats)
-    {
-    }
+    public function __construct(public array $stats) {}
 
     public function envelope(): Envelope
     {

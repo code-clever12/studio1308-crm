@@ -23,8 +23,7 @@ class BookingController extends Controller
         private readonly BookingService $bookingService,
         private readonly SlotService $slotService,
         private readonly PaymentService $paymentService,
-    ) {
-    }
+    ) {}
 
     public function create(Request $request): View
     {

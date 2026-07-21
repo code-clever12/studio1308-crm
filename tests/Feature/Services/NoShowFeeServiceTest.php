@@ -60,6 +60,15 @@ it('does not block a customer with fewer than three no-shows', function () {
     expect($customer->fresh()->is_active)->toBeTrue();
 });
 
+it('counts a customer\'s exact number of no-shows', function () {
+    $customer = User::factory()->create(['role' => 'customer']);
+    Appointment::factory()->count(2)->create(['customer_id' => $customer->id, 'status' => 'no_show']);
+    Appointment::factory()->create(['customer_id' => $customer->id, 'status' => 'completed']);
+
+    expect($this->noShowFeeService->noShowCountForCustomer($customer))->toBe(2)
+        ->and($this->noShowFeeService->shouldBlockCustomer($customer))->toBeFalse();
+});
+
 it('refuses to charge a no-show fee when the customer has no card on file', function () {
     $appointment = Appointment::factory()->create(['status' => 'no_show']);
 

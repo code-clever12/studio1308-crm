@@ -26,9 +26,7 @@ class NoShowFeeService
      */
     private const BLOCK_THRESHOLD = 3;
 
-    public function __construct(private readonly StripeClient $stripe)
-    {
-    }
+    public function __construct(private readonly StripeClient $stripe) {}
 
     /**
      * Appointments whose start time + grace period has passed and are still

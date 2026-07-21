@@ -24,8 +24,7 @@ class AppointmentController extends Controller
         private readonly CancellationService $cancellationService,
         private readonly SlotService $slotService,
         private readonly TipService $tipService,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request): View
     {

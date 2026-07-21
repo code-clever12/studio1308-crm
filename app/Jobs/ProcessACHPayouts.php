@@ -23,8 +23,7 @@ class ProcessACHPayouts implements ShouldQueue
     public function __construct(
         public CarbonInterface $from,
         public CarbonInterface $to,
-    ) {
-    }
+    ) {}
 
     public function handle(ACHPayoutService $achPayoutService): void
     {

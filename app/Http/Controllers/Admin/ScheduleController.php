@@ -13,9 +13,7 @@ use Illuminate\View\View;
 
 class ScheduleController extends Controller
 {
-    public function __construct(private readonly SlotService $slotService)
-    {
-    }
+    public function __construct(private readonly SlotService $slotService) {}
 
     public function edit(Staff $staff): View
     {

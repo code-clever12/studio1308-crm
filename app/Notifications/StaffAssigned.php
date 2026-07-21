@@ -15,9 +15,7 @@ class StaffAssigned extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(public Appointment $appointment)
-    {
-    }
+    public function __construct(public Appointment $appointment) {}
 
     /**
      * @return array<int, string>

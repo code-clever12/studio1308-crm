@@ -21,9 +21,7 @@ class ChargeNoShowFee implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(public Appointment $appointment)
-    {
-    }
+    public function __construct(public Appointment $appointment) {}
 
     public function handle(NoShowFeeService $noShowFeeService, NotificationService $notificationService): void
     {

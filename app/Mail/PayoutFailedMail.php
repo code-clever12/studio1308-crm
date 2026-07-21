@@ -14,9 +14,7 @@ class PayoutFailedMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public ACHPayout $payout)
-    {
-    }
+    public function __construct(public ACHPayout $payout) {}
 
     public function envelope(): Envelope
     {

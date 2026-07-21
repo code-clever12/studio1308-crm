@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\Staff;
-use App\Models\StaffSchedule;
 use App\Models\User;
 
 beforeEach(function () {

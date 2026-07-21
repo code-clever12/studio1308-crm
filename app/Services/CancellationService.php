@@ -19,8 +19,7 @@ class CancellationService
     public function __construct(
         private readonly PaymentService $paymentService,
         private readonly SlotService $slotService,
-    ) {
-    }
+    ) {}
 
     /**
      * Fee charged for a late cancellation. The salon's cancellation_policy
