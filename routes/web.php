@@ -21,7 +21,7 @@ use App\Models\Salon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
+Route::get('/1308studio', function () {
     return view('welcome', ['salon' => Salon::query()->first()]);
 })->name('welcome');
 
