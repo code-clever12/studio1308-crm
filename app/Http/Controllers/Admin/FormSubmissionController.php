@@ -48,11 +48,48 @@ class FormSubmissionController extends Controller
     public function updateStatus(Request $request, FormSubmission $submission): RedirectResponse
     {
         $data = $request->validate([
-            'status' => ['required', 'in:new,contacted,converted,archived'],
+            'status' => ['required', 'in:'.implode(',', FormSubmission::STATUSES)],
         ]);
 
         $submission->update($data);
 
         return back()->with('status', 'Submission status updated.');
+    }
+
+    public function edit(FormSubmission $submission): View
+    {
+        return view('admin.form-submissions.edit', [
+            'submission' => $submission,
+        ]);
+    }
+
+    public function update(Request $request, FormSubmission $submission): RedirectResponse
+    {
+        $data = $request->validate([
+            'payload' => ['nullable', 'array'],
+            'payload.*' => ['nullable', 'string', 'max:2000'],
+            'url' => ['nullable', 'string', 'max:2048'],
+            'value' => ['nullable', 'numeric', 'min:0'],
+            'status' => ['required', 'in:'.implode(',', FormSubmission::STATUSES)],
+        ]);
+
+        $submission->update([
+            'payload' => $data['payload'] ?? [],
+            'url' => $data['url'] ?? null,
+            'value' => $data['value'] ?? null,
+            'status' => $data['status'],
+        ]);
+
+        return redirect()->route('admin.form-submissions.show', $submission->form)
+            ->with('status', 'Submission updated.');
+    }
+
+    public function destroy(FormSubmission $submission): RedirectResponse
+    {
+        $form = $submission->form;
+        $submission->delete();
+
+        return redirect()->route('admin.form-submissions.show', $form)
+            ->with('status', 'Submission deleted.');
     }
 }

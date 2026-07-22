@@ -19,6 +19,7 @@
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('Source URL') }}</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('Submitted') }}</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('Status') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('Actions') }}</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
@@ -47,17 +48,37 @@
                             <form method="POST" action="{{ route('admin.form-submissions.update-status', $submission) }}">
                                 @csrf
                                 @method('PATCH')
-                                <select name="status" onchange="this.form.submit()" class="rounded-md border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                    @foreach (['new', 'contacted', 'converted', 'archived'] as $status)
-                                        <option value="{{ $status }}" @selected($submission->status === $status)>{{ ucfirst($status) }}</option>
+                                <select name="status" onchange="this.form.submit()" @class([
+                                    'rounded-md text-sm focus:ring-indigo-500 border-2',
+                                    'border-blue-200 bg-blue-50 text-blue-700 focus:border-blue-500' => $submission->status === 'cold_lead',
+                                    'border-amber-200 bg-amber-50 text-amber-700 focus:border-amber-500' => $submission->status === 'warm_lead',
+                                    'border-red-200 bg-red-50 text-red-700 focus:border-red-500' => $submission->status === 'hot_lead',
+                                ])>
+                                    @foreach (\App\Models\FormSubmission::STATUSES as $status)
+                                        <option value="{{ $status }}" @selected($submission->status === $status)>{{ ucwords(str_replace('_', ' ', $status)) }}</option>
                                     @endforeach
                                 </select>
                             </form>
                         </td>
+                        <td class="px-6 py-4 text-sm whitespace-nowrap space-x-3">
+                            <a href="{{ route('admin.form-submissions.edit', $submission) }}" class="text-indigo-600 hover:text-indigo-800">{{ __('Edit') }}</a>
+                            <button type="button" x-data x-on:click="$dispatch('open-modal', 'delete-submission-{{ $submission->id }}')" class="text-red-600 hover:text-red-800">
+                                {{ __('Delete') }}
+                            </button>
+
+                            <x-confirm-modal
+                                id="delete-submission-{{ $submission->id }}"
+                                :title="__('Delete this lead?')"
+                                :action="route('admin.form-submissions.destroy', $submission)"
+                                :confirm-label="__('Delete')"
+                            >
+                                {{ __('This permanently removes the submission. This cannot be undone.') }}
+                            </x-confirm-modal>
+                        </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="{{ $payloadKeys->count() + 5 }}" class="px-6 py-8 text-center text-sm text-gray-500">
+                        <td colspan="{{ $payloadKeys->count() + 6 }}" class="px-6 py-8 text-center text-sm text-gray-500">
                             {{ __('No submissions for this form yet.') }}
                         </td>
                     </tr>

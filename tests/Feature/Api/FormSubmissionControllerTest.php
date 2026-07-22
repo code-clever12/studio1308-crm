@@ -37,7 +37,7 @@ it('creates a new Form and stores the submission with payload/utm/value split ou
         ])
         ->and((float) $submission->value)->toBe(49.99)
         ->and($submission->url)->toBe('https://someuser.github.io/hair-salon-savannah/')
-        ->and($submission->status)->toBe('new')
+        ->and($submission->status)->toBe('cold_lead')
         ->and($submission->submission_time)->not->toBeNull();
 });
 

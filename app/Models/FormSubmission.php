@@ -12,6 +12,8 @@ class FormSubmission extends Model
     /** @use HasFactory<FormSubmissionFactory> */
     use HasFactory;
 
+    public const STATUSES = ['cold_lead', 'warm_lead', 'hot_lead'];
+
     protected $fillable = [
         'form_id',
         'payload',

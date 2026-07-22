@@ -123,7 +123,10 @@ Route::middleware(['auth', 'verified', 'role:admin', 'throttle:60,1'])->prefix('
 
     Route::get('/form-submissions', [FormSubmissionController::class, 'index'])->name('form-submissions.index');
     Route::get('/form-submissions/{form}', [FormSubmissionController::class, 'show'])->name('form-submissions.show');
+    Route::get('/form-submissions/{submission}/edit', [FormSubmissionController::class, 'edit'])->name('form-submissions.edit');
+    Route::put('/form-submissions/{submission}', [FormSubmissionController::class, 'update'])->name('form-submissions.update');
     Route::patch('/form-submissions/{submission}', [FormSubmissionController::class, 'updateStatus'])->name('form-submissions.update-status');
+    Route::delete('/form-submissions/{submission}', [FormSubmissionController::class, 'destroy'])->name('form-submissions.destroy');
 
     Route::get('/reports/commission', [ReportController::class, 'commission'])->name('reports.commission');
     Route::get('/reports/tips', [ReportController::class, 'tips'])->name('reports.tips');

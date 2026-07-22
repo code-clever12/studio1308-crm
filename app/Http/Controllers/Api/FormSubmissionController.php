@@ -48,7 +48,7 @@ class FormSubmissionController extends Controller
             'url' => $request->string('url')->toString() ?: null,
             'utm_parameters' => $utmParameters ?: null,
             'value' => $request->input('value'),
-            'status' => 'new',
+            'status' => 'cold_lead',
             'submission_time' => now(),
         ]);
 

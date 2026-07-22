@@ -28,7 +28,7 @@ class FormSubmissionFactory extends Factory
                 'utm_campaign' => fake()->word(),
             ],
             'value' => fake()->randomFloat(2, 10, 200),
-            'status' => 'new',
+            'status' => fake()->randomElement(FormSubmission::STATUSES),
             'submission_time' => fake()->dateTimeBetween('-30 days'),
         ];
     }

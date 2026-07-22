@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('url')->nullable();
             $table->json('utm_parameters')->nullable();
             $table->decimal('value', 10, 2)->nullable();
-            $table->enum('status', ['new', 'contacted', 'converted', 'archived'])->default('new');
+            $table->enum('status', ['cold_lead', 'warm_lead', 'hot_lead'])->default('cold_lead');
             $table->timestamp('submission_time');
             $table->timestamps();
 
