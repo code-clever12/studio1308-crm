@@ -3,11 +3,13 @@
 use App\Mail\AdminDailySummaryMail;
 use App\Mail\BookingConfirmationMail;
 use App\Mail\CancellationNoticeMail;
+use App\Mail\NewFormSubmissionMail;
 use App\Mail\NoShowFeeChargedMail;
 use App\Mail\PayoutFailedMail;
 use App\Mail\WaitlistNotificationMail;
 use App\Models\ACHPayout;
 use App\Models\Appointment;
+use App\Models\FormSubmission;
 use App\Models\Salon;
 use App\Models\Staff;
 use App\Models\Tip;
@@ -17,6 +19,7 @@ use App\Notifications\AdminDailySummary;
 use App\Notifications\AppointmentCancelled;
 use App\Notifications\AppointmentReminder;
 use App\Notifications\BookingConfirmed;
+use App\Notifications\NewFormSubmissionReceived;
 use App\Notifications\NoShowFeeCharged;
 use App\Notifications\PayoutFailed;
 use App\Notifications\StaffAssigned;
@@ -203,6 +206,28 @@ it('sends a payout-failed alert email to every admin user', function () {
 
     $html = $mail->render();
     expect($html)->toContain('Account closed');
+});
+
+it('sends a new-lead alert email to every admin user when a form is submitted', function () {
+    Notification::fake();
+
+    $admin = User::factory()->admin()->create();
+    $submission = FormSubmission::factory()->create([
+        'payload' => ['full_name' => 'Jane Doe', 'phone_number' => '555-1234'],
+        'value' => 49.99,
+    ]);
+
+    $this->notificationService->sendNewFormSubmissionAlert($submission);
+
+    Notification::assertSentTo($admin, NewFormSubmissionReceived::class);
+
+    $mail = (new NewFormSubmissionReceived($submission))->toMail($admin);
+    expect($mail)->toBeInstanceOf(NewFormSubmissionMail::class)
+        ->and($mail->hasTo($admin->email))->toBeTrue();
+
+    $html = $mail->render();
+    expect($html)->toContain('Jane Doe')
+        ->and($html)->toContain('49.99');
 });
 
 it('generates valid iCalendar content for the booking confirmation attachment', function () {

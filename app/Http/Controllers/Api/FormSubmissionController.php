@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\SubmitFormRequest;
 use App\Models\Form;
 use App\Models\FormSubmission;
+use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 
 /**
@@ -21,6 +22,10 @@ class FormSubmissionController extends Controller
      * dynamic per-landing-page form data and goes into payload as-is.
      */
     private const META_KEYS = ['form_slug', 'form_name', 'url', 'value'];
+
+    public function __construct(
+        private readonly NotificationService $notificationService,
+    ) {}
 
     public function store(SubmitFormRequest $request): JsonResponse
     {
@@ -46,6 +51,8 @@ class FormSubmissionController extends Controller
             'status' => 'new',
             'submission_time' => now(),
         ]);
+
+        $this->notificationService->sendNewFormSubmissionAlert($submission);
 
         return response()->json([
             'success' => true,

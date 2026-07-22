@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\ACHPayout;
 use App\Models\Appointment;
+use App\Models\FormSubmission;
 use App\Models\Tip;
 use App\Models\User;
 use App\Models\Waitlist;
@@ -11,6 +12,7 @@ use App\Notifications\AdminDailySummary;
 use App\Notifications\AppointmentCancelled;
 use App\Notifications\AppointmentReminder;
 use App\Notifications\BookingConfirmed;
+use App\Notifications\NewFormSubmissionReceived;
 use App\Notifications\NoShowFeeCharged;
 use App\Notifications\PayoutFailed;
 use App\Notifications\StaffAssigned;
@@ -78,6 +80,13 @@ class NotificationService
     {
         User::where('role', 'admin')->get()->each(
             fn (User $admin) => $admin->notify(new PayoutFailed($payout))
+        );
+    }
+
+    public function sendNewFormSubmissionAlert(FormSubmission $submission): void
+    {
+        User::where('role', 'admin')->get()->each(
+            fn (User $admin) => $admin->notify(new NewFormSubmissionReceived($submission))
         );
     }
 }
