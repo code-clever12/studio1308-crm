@@ -26,7 +26,7 @@ class SalonSeeder extends Seeder
         Salon::firstOrCreate(
             ['owner_id' => $owner->id],
             [
-                'name' => 'Ritual Barber Studio',
+                'name' => '1308Studio',
                 'description' => 'A modern salon offering premium hair, skin, and wellness services.',
                 'address' => '123 Main Street',
                 'city' => 'New York',

@@ -1,4 +1,4 @@
-# Ritual Barber Studio
+# 1308Studio
 
 A complete Salon & Appointment Booking Management Platform for a single, independent USA salon — built with Laravel 12, Blade, Tailwind CSS v4, Alpine.js, and Stripe.
 
@@ -63,7 +63,7 @@ php artisan test
 ./vendor/bin/pint --test   # code style check
 ```
 
-170+ Pest tests cover booking/overlap prevention, payments (mocked Stripe HTTP calls + offline webhook signature verification), notifications/email, authorization, and a full end-to-end booking journey.
+174+ Pest tests cover booking/overlap prevention, payments (mocked Stripe HTTP calls + offline webhook signature verification), notifications/email, authorization, and a full end-to-end booking journey.
 
 ## Project structure
 

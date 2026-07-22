@@ -33,7 +33,7 @@ it('marks eligible appointments as no-shows and queues the fee charge', function
     Queue::assertPushed(ChargeNoShowFee::class, fn ($job) => $job->appointment->id === $appointment->id);
 });
 
-it('logs and exits cleanly when charging the no-show fee since Stripe is not yet wired up', function () {
+it('logs and exits cleanly when the customer has no card on file for the no-show fee', function () {
     $appointment = Appointment::factory()->create(['status' => 'no_show']);
 
     (new ChargeNoShowFee($appointment))->handle(

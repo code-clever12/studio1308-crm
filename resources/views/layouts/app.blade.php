@@ -55,8 +55,8 @@
 
             <footer class="bg-pine-950 text-parchment/70 mt-16">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <p class="font-display text-lg text-parchment">{{ config('app.name', 'Ritual Barber Studio') }}</p>
-                    <p class="text-sm">&copy; {{ now()->year }} {{ config('app.name', 'Ritual Barber Studio') }}. All rights reserved.</p>
+                    <p class="font-display text-lg text-parchment">{{ config('app.name', '1308Studio') }}</p>
+                    <p class="text-sm">&copy; {{ now()->year }} {{ config('app.name', '1308Studio') }}. All rights reserved.</p>
                 </div>
             </footer>
         </div>

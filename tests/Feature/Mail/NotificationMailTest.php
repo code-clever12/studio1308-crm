@@ -39,7 +39,7 @@ use Illuminate\Support\Facades\Notification;
 
 beforeEach(function () {
     Salon::factory()->create([
-        'name' => 'Ritual Barber Studio',
+        'name' => '1308Studio',
         'address' => '123 Main St',
         'city' => 'Austin',
         'state' => 'TX',

@@ -4,7 +4,7 @@
             <div class="flex">
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}" class="font-display text-xl tracking-wide text-parchment">
-                        {{ config('app.name', 'Ritual Barber Studio') }}
+                        {{ config('app.name', '1308Studio') }}
                     </a>
                 </div>
 

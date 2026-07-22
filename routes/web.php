@@ -17,12 +17,13 @@ use App\Http\Controllers\Customer\ReviewController;
 use App\Http\Controllers\Customer\TipController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
+use App\Models\Salon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
-});
+    return view('welcome', ['salon' => Salon::query()->first()]);
+})->name('welcome');
 
 Route::get('/dashboard', function (Request $request) {
     $user = $request->user();

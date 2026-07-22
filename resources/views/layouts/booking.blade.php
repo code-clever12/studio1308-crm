@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ __('Book an Appointment') }} - {{ config('app.name', 'Ritual Barber Studio') }}</title>
+        <title>{{ __('Book an Appointment') }} - {{ config('app.name', '1308Studio') }}</title>
 
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600|oswald:500,600,700&display=swap" rel="stylesheet" />
@@ -17,7 +17,7 @@
             <header class="bg-pine-950 text-parchment">
                 <div class="max-w-3xl mx-auto px-4 sm:px-6 py-5 flex items-center justify-between">
                     <a href="{{ route('dashboard') }}" class="font-display text-lg tracking-wide">
-                        {{ config('app.name', 'Ritual Barber Studio') }}
+                        {{ config('app.name', '1308Studio') }}
                     </a>
                     <a href="{{ route('customer.appointments.index') }}" class="text-sm text-parchment/70 hover:text-parchment">
                         {{ __('Cancel') }}
