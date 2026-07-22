@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AppointmentController as AdminAppointmentControll
 use App\Http\Controllers\Admin\CustomerController as AdminCustomerController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\FormBuilderController;
+use App\Http\Controllers\Admin\FormSubmissionController;
 use App\Http\Controllers\Admin\PayoutController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\ScheduleController;
@@ -119,6 +120,10 @@ Route::middleware(['auth', 'verified', 'role:admin', 'throttle:60,1'])->prefix('
 
     Route::resource('forms', FormBuilderController::class)->except(['show']);
     Route::get('/forms/{form}/responses', [FormBuilderController::class, 'responses'])->name('forms.responses');
+
+    Route::get('/form-submissions', [FormSubmissionController::class, 'index'])->name('form-submissions.index');
+    Route::get('/form-submissions/{form}', [FormSubmissionController::class, 'show'])->name('form-submissions.show');
+    Route::patch('/form-submissions/{submission}', [FormSubmissionController::class, 'updateStatus'])->name('form-submissions.update-status');
 
     Route::get('/reports/commission', [ReportController::class, 'commission'])->name('reports.commission');
     Route::get('/reports/tips', [ReportController::class, 'tips'])->name('reports.tips');
