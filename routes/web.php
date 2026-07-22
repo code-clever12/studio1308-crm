@@ -25,12 +25,6 @@ Route::get('/', function () {
     return view('welcome', ['salon' => Salon::query()->first()]);
 })->name('welcome');
 
-// Standalone SEO landing page (own design system, not the app's Blade
-// layouts) — see resources/views/landing/hair-salon-savannah.blade.php.
-Route::get('/hair-salon-savannah', function () {
-    return view('landing.hair-salon-savannah');
-})->name('landing.hair-salon-savannah');
-
 Route::get('/dashboard', function (Request $request) {
     $user = $request->user();
 
