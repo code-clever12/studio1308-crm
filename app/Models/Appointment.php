@@ -153,7 +153,7 @@ class Appointment extends Model
             'CALSCALE:GREGORIAN',
             'METHOD:PUBLISH',
             'BEGIN:VEVENT',
-            'UID:appointment-'.$this->id.'@'.(parse_url((string) config('app.url'), PHP_URL_HOST) ?: 'ritualbarberstudio.test'),
+            'UID:appointment-'.$this->id.'@'.(parse_url((string) config('app.url'), PHP_URL_HOST) ?: 'studio1308.com'),
             'DTSTAMP:'.now()->format('Ymd\THis'),
             'DTSTART:'.$start->format('Ymd\THis'),
             'DTEND:'.$end->format('Ymd\THis'),
