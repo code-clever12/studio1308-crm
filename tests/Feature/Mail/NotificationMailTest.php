@@ -230,6 +230,36 @@ it('sends a new-lead alert email to every admin user when a form is submitted', 
         ->and($html)->toContain('49.99');
 });
 
+it('also emails extra addresses configured in the salon\'s lead notification settings', function () {
+    Notification::fake();
+
+    Salon::query()->first()->update([
+        'lead_notification_emails' => 'sales@example.com, owner@example.com ,',
+    ]);
+
+    $admin = User::factory()->admin()->create();
+    $submission = FormSubmission::factory()->create();
+
+    $this->notificationService->sendNewFormSubmissionAlert($submission);
+
+    Notification::assertSentTo($admin, NewFormSubmissionReceived::class);
+    Notification::assertSentOnDemand(
+        NewFormSubmissionReceived::class,
+        fn ($notification, $channels, $notifiable) => $notifiable->routes['mail'] === ['sales@example.com', 'owner@example.com']
+    );
+});
+
+it('skips the extra-address notification entirely when none are configured', function () {
+    Notification::fake();
+
+    // The beforeEach salon's factory-generated owner is itself an admin, so
+    // exactly one notification (to that owner) is expected — none on-demand,
+    // since lead_notification_emails is blank by default.
+    $this->notificationService->sendNewFormSubmissionAlert(FormSubmission::factory()->create());
+
+    Notification::assertSentTimes(NewFormSubmissionReceived::class, 1);
+});
+
 it('generates valid iCalendar content for the booking confirmation attachment', function () {
     $appointment = Appointment::factory()->create([
         'appointment_date' => '2026-08-18',

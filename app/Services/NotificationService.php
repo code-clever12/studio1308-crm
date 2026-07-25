@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\ACHPayout;
 use App\Models\Appointment;
 use App\Models\FormSubmission;
+use App\Models\Salon;
 use App\Models\Tip;
 use App\Models\User;
 use App\Models\Waitlist;
@@ -18,6 +19,7 @@ use App\Notifications\PayoutFailed;
 use App\Notifications\StaffAssigned;
 use App\Notifications\TipReceived;
 use App\Notifications\WaitlistSlotAvailable;
+use Illuminate\Support\Facades\Notification;
 
 /**
  * Thin wrapper around dispatching the app's Notification classes (see
@@ -88,5 +90,11 @@ class NotificationService
         User::where('role', 'admin')->get()->each(
             fn (User $admin) => $admin->notify(new NewFormSubmissionReceived($submission))
         );
+
+        $extraEmails = Salon::query()->first()?->leadNotificationEmails() ?? [];
+
+        if ($extraEmails !== []) {
+            Notification::route('mail', $extraEmails)->notify(new NewFormSubmissionReceived($submission));
+        }
     }
 }

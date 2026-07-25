@@ -39,6 +39,13 @@
             </div>
 
             <div>
+                <h3 class="text-sm font-semibold text-gray-800 mb-4">{{ __('Lead Notifications') }}</h3>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('Additional Notification Emails') }}</label>
+                <textarea name="lead_notification_emails" rows="2" placeholder="{{ __('owner@example.com, sales@example.com') }}" class="w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">{{ old('lead_notification_emails', $salon->lead_notification_emails) }}</textarea>
+                <p class="mt-1 text-xs text-gray-500">{{ __('Comma-separated. These addresses get emailed every time a new lead comes in through a landing page form, in addition to admin accounts.') }}</p>
+            </div>
+
+            <div>
                 <h3 class="text-sm font-semibold text-gray-800 mb-4">{{ __('Address & Timezone') }}</h3>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div class="sm:col-span-2">

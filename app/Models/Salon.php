@@ -30,6 +30,7 @@ class Salon extends Model
         'zip_code',
         'phone',
         'email',
+        'lead_notification_emails',
         'website',
         'logo',
         'timezone',
@@ -60,6 +61,23 @@ class Salon extends Model
     public function owner(): BelongsTo
     {
         return $this->belongsTo(User::class, 'owner_id');
+    }
+
+    /**
+     * Extra addresses (beyond admin-role users) that should receive lead
+     * notification emails — see NotificationService::sendNewFormSubmissionAlert().
+     * Stored as a single comma-separated string so the Settings page can use
+     * a plain textarea rather than a repeatable field builder.
+     *
+     * @return array<int, string>
+     */
+    public function leadNotificationEmails(): array
+    {
+        return collect(explode(',', (string) $this->lead_notification_emails))
+            ->map(fn (string $email) => trim($email))
+            ->filter()
+            ->values()
+            ->all();
     }
 
     public function consentForms(): HasMany

@@ -28,7 +28,11 @@ class NewFormSubmissionReceived extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): NewFormSubmissionMail
     {
-        return (new NewFormSubmissionMail($this->submission))->to($notifiable->email);
+        // routeNotificationFor('mail') rather than $notifiable->email directly,
+        // since this is also sent to on-demand/anonymous notifiables (plain
+        // addresses from Salon::leadNotificationEmails(), not User models) —
+        // see NotificationService::sendNewFormSubmissionAlert().
+        return (new NewFormSubmissionMail($this->submission))->to($notifiable->routeNotificationFor('mail'));
     }
 
     /**
