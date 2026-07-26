@@ -104,3 +104,63 @@ it('blocks a non-admin from viewing, editing, or deleting form submissions', fun
     $this->actingAs($customer)->get(route('admin.form-submissions.edit', $submission))->assertForbidden();
     $this->actingAs($customer)->delete(route('admin.form-submissions.destroy', $submission))->assertForbidden();
 });
+
+it('lists submissions across all forms with a Form column', function () {
+    $formA = Form::factory()->create();
+    $formB = Form::factory()->create();
+    $submissionA = FormSubmission::factory()->create(['form_id' => $formA->id]);
+    $submissionB = FormSubmission::factory()->create(['form_id' => $formB->id]);
+
+    $response = $this->actingAs($this->admin)->get(route('admin.form-submissions.all'));
+
+    $response->assertOk();
+    expect($response->viewData('submissions')->pluck('id'))
+        ->toContain($submissionA->id)
+        ->toContain($submissionB->id);
+});
+
+it('filters all-submissions by form', function () {
+    $formA = Form::factory()->create();
+    $formB = Form::factory()->create();
+    $submissionA = FormSubmission::factory()->create(['form_id' => $formA->id]);
+    $submissionB = FormSubmission::factory()->create(['form_id' => $formB->id]);
+
+    $response = $this->actingAs($this->admin)
+        ->get(route('admin.form-submissions.all', ['form_id' => $formA->id]));
+
+    $ids = $response->viewData('submissions')->pluck('id');
+    expect($ids)->toContain($submissionA->id)
+        ->and($ids)->not->toContain($submissionB->id);
+});
+
+it('filters all-submissions by the service payload field', function () {
+    $lashes = FormSubmission::factory()->create(['payload' => ['service' => 'lashes']]);
+    $hair = FormSubmission::factory()->create(['payload' => ['service' => 'hair']]);
+
+    $response = $this->actingAs($this->admin)
+        ->get(route('admin.form-submissions.all', ['service' => 'lashes']));
+
+    $ids = $response->viewData('submissions')->pluck('id');
+    expect($ids)->toContain($lashes->id)
+        ->and($ids)->not->toContain($hair->id);
+
+    expect($response->viewData('services')->all())->toContain('hair', 'lashes');
+});
+
+it('filters all-submissions by capture status', function () {
+    $completed = FormSubmission::factory()->create(['capture_status' => 'completed']);
+    $abandoned = FormSubmission::factory()->create(['capture_status' => 'abandoned']);
+
+    $response = $this->actingAs($this->admin)
+        ->get(route('admin.form-submissions.all', ['capture_status' => 'abandoned']));
+
+    $ids = $response->viewData('submissions')->pluck('id');
+    expect($ids)->toContain($abandoned->id)
+        ->and($ids)->not->toContain($completed->id);
+});
+
+it('blocks a non-admin from viewing all submissions', function () {
+    $customer = User::factory()->create(['role' => 'customer']);
+
+    $this->actingAs($customer)->get(route('admin.form-submissions.all'))->assertForbidden();
+});

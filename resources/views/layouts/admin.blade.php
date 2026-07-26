@@ -33,6 +33,7 @@
                     <x-admin-nav-link route="admin.customers.index" active="admin.customers.*">{{ __('Customers') }}</x-admin-nav-link>
                     <x-admin-nav-link route="admin.forms.index" active="admin.forms.*">{{ __('Consent Forms') }}</x-admin-nav-link>
                     <x-admin-nav-link route="admin.form-submissions.index" active="admin.form-submissions.*">{{ __('Form Submissions') }}</x-admin-nav-link>
+                    <x-admin-nav-link route="admin.form-submissions.all" class="pl-6 text-xs">{{ __('Submissions') }}</x-admin-nav-link>
 
                     <p class="px-3 pt-4 pb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Reports') }}</p>
                     <x-admin-nav-link route="admin.reports.commission">{{ __('Commission') }}</x-admin-nav-link>

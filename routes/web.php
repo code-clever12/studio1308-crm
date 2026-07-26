@@ -122,6 +122,7 @@ Route::middleware(['auth', 'verified', 'role:admin', 'throttle:60,1'])->prefix('
     Route::get('/forms/{form}/responses', [FormBuilderController::class, 'responses'])->name('forms.responses');
 
     Route::get('/form-submissions', [FormSubmissionController::class, 'index'])->name('form-submissions.index');
+    Route::get('/submissions', [FormSubmissionController::class, 'all'])->name('form-submissions.all');
     Route::get('/form-submissions/{form}', [FormSubmissionController::class, 'show'])->name('form-submissions.show');
     Route::get('/form-submissions/{submission}/edit', [FormSubmissionController::class, 'edit'])->name('form-submissions.edit');
     Route::put('/form-submissions/{submission}', [FormSubmissionController::class, 'update'])->name('form-submissions.update');

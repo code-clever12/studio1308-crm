@@ -30,6 +30,46 @@ class FormSubmissionController extends Controller
         ]);
     }
 
+    public function all(Request $request): View
+    {
+        $query = FormSubmission::with('form')->latest('submission_time');
+
+        if ($request->filled('form_id')) {
+            $query->where('form_id', $request->integer('form_id'));
+        }
+
+        if ($request->filled('service')) {
+            $query->where('payload->service', $request->string('service')->toString());
+        }
+
+        if ($request->filled('capture_status')) {
+            $query->where('capture_status', $request->string('capture_status')->toString());
+        }
+
+        $submissions = $query->get();
+
+        // Services list is drawn from ALL submissions (not the filtered set)
+        // so the dropdown always offers every option, even ones the current
+        // filter has narrowed out of the visible table.
+        $services = FormSubmission::query()
+            ->get()
+            ->map(fn (FormSubmission $s) => $s->payload['service'] ?? null)
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values();
+
+        return view('admin.form-submissions.all', [
+            'submissions' => $submissions,
+            'payloadKeys' => $submissions->flatMap(fn (FormSubmission $s) => array_keys($s->payload ?? []))->unique()->values(),
+            'forms' => Form::orderBy('name')->get(),
+            'services' => $services,
+            'selectedFormId' => $request->integer('form_id') ?: null,
+            'selectedService' => $request->string('service')->toString() ?: null,
+            'selectedCaptureStatus' => $request->string('capture_status')->toString() ?: null,
+        ]);
+    }
+
     public function show(Form $form): View
     {
         $submissions = $form->submissions()->latest('submission_time')->get();
