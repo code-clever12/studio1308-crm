@@ -4,7 +4,7 @@
         <h2 class="font-semibold text-xl text-gray-800 leading-tight mt-1">
             {{ $form->name }}
         </h2>
-        <p class="text-sm text-gray-500 mt-0.5">{{ __('Slug') }}: {{ $form->slug }}</p>
+        <!-- <p class="text-sm text-gray-500 mt-0.5">{{ __('Slug') }}: {{ $form->slug }}</p> -->
     </x-slot>
 
     <div class="data-table-wrapper">
@@ -18,6 +18,7 @@
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('Value') }}</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('Source URL') }}</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('Submitted') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('Capture') }}</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('Status') }}</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('Actions') }}</th>
                 </tr>
@@ -44,6 +45,15 @@
                             @endif
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">{{ $submission->submission_time->format('M j, Y g:i A') }}</td>
+                        <td class="px-6 py-4">
+                            <span @class([
+                                'inline-flex rounded-full px-2 py-1 text-xs font-medium',
+                                'bg-green-50 text-green-700' => $submission->capture_status === 'completed',
+                                'bg-gray-100 text-gray-600' => $submission->capture_status === 'abandoned',
+                            ])>
+                                {{ ucfirst($submission->capture_status) }}
+                            </span>
+                        </td>
                         <td class="px-6 py-4">
                             <form method="POST" action="{{ route('admin.form-submissions.update-status', $submission) }}">
                                 @csrf
@@ -78,7 +88,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="{{ $payloadKeys->count() + 6 }}" class="px-6 py-8 text-center text-sm text-gray-500">
+                        <td colspan="{{ $payloadKeys->count() + 7 }}" class="px-6 py-8 text-center text-sm text-gray-500">
                             {{ __('No submissions for this form yet.') }}
                         </td>
                     </tr>

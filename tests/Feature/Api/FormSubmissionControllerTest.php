@@ -2,6 +2,9 @@
 
 use App\Models\Form;
 use App\Models\FormSubmission;
+use App\Models\User;
+use App\Notifications\NewFormSubmissionReceived;
+use Illuminate\Support\Facades\Notification;
 
 it('creates a new Form and stores the submission with payload/utm/value split out', function () {
     $response = $this->postJson(route('api.v1.submit-form'), [
@@ -74,4 +77,117 @@ it('sends permissive CORS headers for cross-origin browser requests', function (
     ], ['Origin' => 'https://someuser.github.io']);
 
     $response->assertHeader('Access-Control-Allow-Origin', '*');
+});
+
+it('marks a partial submission as abandoned and does not notify admins', function () {
+    Notification::fake();
+
+    $admin = User::factory()->admin()->create();
+
+    $response = $this->postJson(route('api.v1.submit-form'), [
+        'form_slug' => 'booking-wizard',
+        'draft_id' => 'draft-123',
+        'is_partial' => true,
+        'full_name' => 'Jane Doe',
+    ]);
+
+    $response->assertCreated();
+
+    $submission = FormSubmission::where('draft_id', 'draft-123')->first();
+    expect($submission)->not->toBeNull()
+        ->and($submission->capture_status)->toBe('abandoned');
+
+    Notification::assertNotSentTo($admin, NewFormSubmissionReceived::class);
+});
+
+it('updates the same row instead of duplicating on a repeat draft_id submission', function () {
+    $this->postJson(route('api.v1.submit-form'), [
+        'form_slug' => 'booking-wizard',
+        'draft_id' => 'draft-123',
+        'is_partial' => true,
+        'full_name' => 'Jane Doe',
+    ])->assertCreated();
+
+    $this->postJson(route('api.v1.submit-form'), [
+        'form_slug' => 'booking-wizard',
+        'draft_id' => 'draft-123',
+        'is_partial' => true,
+        'full_name' => 'Jane Doe',
+        'phone_number' => '555-1234',
+    ])->assertCreated();
+
+    expect(FormSubmission::where('draft_id', 'draft-123')->count())->toBe(1);
+
+    $submission = FormSubmission::where('draft_id', 'draft-123')->first();
+    expect($submission->payload)->toBe([
+        'full_name' => 'Jane Doe',
+        'phone_number' => '555-1234',
+    ]);
+});
+
+it('marks the draft completed and notifies admins once the final submission arrives', function () {
+    Notification::fake();
+
+    $admin = User::factory()->admin()->create();
+
+    $this->postJson(route('api.v1.submit-form'), [
+        'form_slug' => 'booking-wizard',
+        'draft_id' => 'draft-456',
+        'is_partial' => true,
+        'full_name' => 'Jane Doe',
+    ])->assertCreated();
+
+    Notification::assertNotSentTo($admin, NewFormSubmissionReceived::class);
+
+    $this->postJson(route('api.v1.submit-form'), [
+        'form_slug' => 'booking-wizard',
+        'draft_id' => 'draft-456',
+        'is_partial' => false,
+        'full_name' => 'Jane Doe',
+        'phone_number' => '555-1234',
+    ])->assertCreated();
+
+    expect(FormSubmission::where('draft_id', 'draft-456')->count())->toBe(1);
+
+    $submission = FormSubmission::where('draft_id', 'draft-456')->first();
+    expect($submission->capture_status)->toBe('completed');
+
+    Notification::assertSentTo($admin, NewFormSubmissionReceived::class);
+});
+
+it('preserves an admin-assigned lead status across repeat draft submissions', function () {
+    $this->postJson(route('api.v1.submit-form'), [
+        'form_slug' => 'booking-wizard',
+        'draft_id' => 'draft-789',
+        'is_partial' => true,
+        'full_name' => 'Jane Doe',
+    ])->assertCreated();
+
+    $submission = FormSubmission::where('draft_id', 'draft-789')->first();
+    $submission->update(['status' => 'hot_lead']);
+
+    $this->postJson(route('api.v1.submit-form'), [
+        'form_slug' => 'booking-wizard',
+        'draft_id' => 'draft-789',
+        'is_partial' => false,
+        'full_name' => 'Jane Doe',
+    ])->assertCreated();
+
+    expect($submission->fresh()->status)->toBe('hot_lead');
+});
+
+it('defaults capture_status to completed and still notifies when is_partial is omitted entirely', function () {
+    Notification::fake();
+
+    $admin = User::factory()->admin()->create();
+
+    $this->postJson(route('api.v1.submit-form'), [
+        'form_slug' => 'summer-offer-20',
+        'full_name' => 'No Partial Flag',
+    ])->assertCreated();
+
+    $submission = FormSubmission::latest('id')->first();
+    expect($submission->capture_status)->toBe('completed');
+
+    Notification::assertSentTo($admin, NewFormSubmissionReceived::class);
 });

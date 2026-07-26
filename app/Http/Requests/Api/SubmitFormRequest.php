@@ -33,6 +33,8 @@ class SubmitFormRequest extends FormRequest
             'form_name' => ['nullable', 'string', 'max:255'],
             'url' => ['nullable', 'string', 'max:2048'],
             'value' => ['nullable', 'numeric', 'min:0'],
+            'draft_id' => ['nullable', 'string', 'max:255'],
+            'is_partial' => ['nullable', 'boolean'],
         ];
     }
 }
