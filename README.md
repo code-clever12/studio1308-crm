@@ -45,7 +45,7 @@ All seeded with the password `password`:
 
 | Role | Email |
 |---|---|
-| Admin | `admin@ritualsalon.test` |
+| Admin | `monirhossain0621@gmail.com` |
 | Staff | `jordan@ritualsalon.test` (and `morgan`/`casey`/`riley`/`sam@ritualsalon.test`) |
 | Customer | `customer@ritualsalon.test` |
 

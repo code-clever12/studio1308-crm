@@ -11,7 +11,7 @@ class SalonSeeder extends Seeder
     public function run(): void
     {
         $owner = User::firstOrCreate(
-            ['email' => 'admin@ritualsalon.test'],
+            ['email' => 'monirhossain0621@gmail.com'],
             [
                 'name' => 'Alex Rivera',
                 'phone' => '2125551000',
