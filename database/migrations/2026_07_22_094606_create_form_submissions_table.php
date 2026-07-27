@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('form_id')->constrained()->cascadeOnDelete();
             $table->json('payload');
-            $table->string('url')->nullable();
+            $table->text('url')->nullable();
             $table->json('utm_parameters')->nullable();
             $table->decimal('value', 10, 2)->nullable();
             $table->enum('status', ['cold_lead', 'warm_lead', 'hot_lead'])->default('cold_lead');
