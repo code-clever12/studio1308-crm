@@ -19,6 +19,7 @@ use App\Notifications\AdminDailySummary;
 use App\Notifications\AppointmentCancelled;
 use App\Notifications\AppointmentReminder;
 use App\Notifications\BookingConfirmed;
+use App\Notifications\Channels\FcmChannel;
 use App\Notifications\NewFormSubmissionReceived;
 use App\Notifications\NoShowFeeCharged;
 use App\Notifications\PayoutFailed;
@@ -26,6 +27,7 @@ use App\Notifications\StaffAssigned;
 use App\Notifications\TipReceived;
 use App\Notifications\WaitlistSlotAvailable;
 use App\Services\NotificationService;
+use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Support\Facades\Notification;
 
 /*
@@ -228,6 +230,18 @@ it('sends a new-lead alert email to every admin user when a form is submitted', 
     $html = $mail->render();
     expect($html)->toContain('Jane Doe')
         ->and($html)->toContain('49.99');
+});
+
+it('only routes the database and push channels to real User accounts, never on-demand notifiables', function () {
+    $admin = User::factory()->admin()->create();
+    $submission = FormSubmission::factory()->create();
+    $notification = new NewFormSubmissionReceived($submission);
+
+    expect($notification->via($admin))->toBe(['database', 'mail', FcmChannel::class]);
+
+    $anonymous = new AnonymousNotifiable;
+    $anonymous->route('mail', 'sales@example.com');
+    expect($notification->via($anonymous))->toBe(['mail']);
 });
 
 it('also emails extra addresses configured in the salon\'s lead notification settings', function () {

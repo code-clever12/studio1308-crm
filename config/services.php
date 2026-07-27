@@ -47,4 +47,17 @@ return [
         'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
     ],
 
+    /*
+    | Push notifications to the mobile app (new lead alerts) via Firebase
+    | Cloud Messaging's HTTP v1 API. "credentials_path" points at a Firebase
+    | service-account JSON key file (Firebase Console > Project Settings >
+    | Service Accounts > Generate new private key). See App\Services\
+    | PushNotificationService — gracefully does nothing until both values
+    | are set, same "build now, connect later" pattern as Stripe above.
+    */
+    'fcm' => [
+        'project_id' => env('FCM_PROJECT_ID'),
+        'credentials_path' => env('FCM_CREDENTIALS_PATH'),
+    ],
+
 ];

@@ -4,6 +4,8 @@ namespace App\Notifications;
 
 use App\Mail\NewFormSubmissionMail;
 use App\Models\FormSubmission;
+use App\Models\User;
+use App\Notifications\Channels\FcmChannel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
@@ -23,7 +25,30 @@ class NewFormSubmissionReceived extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
+        // Also sent to on-demand/anonymous notifiables (plain addresses from
+        // Salon::leadNotificationEmails()) — those have no notifications()
+        // relation or device tokens, so 'database' and the mobile push
+        // channel only apply to real User (admin) accounts.
+        if ($notifiable instanceof User) {
+            return ['database', 'mail', FcmChannel::class];
+        }
+
+        return ['mail'];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function toFcm(object $notifiable): array
+    {
+        return [
+            'title' => 'New Lead',
+            'body' => "New lead from {$this->submission->form->name}.",
+            'data' => [
+                'type' => 'new_lead',
+                'submission_id' => (string) $this->submission->id,
+            ],
+        ];
     }
 
     public function toMail(object $notifiable): NewFormSubmissionMail

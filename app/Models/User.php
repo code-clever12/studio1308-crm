@@ -9,11 +9,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -124,5 +125,13 @@ class User extends Authenticatable
     public function loyaltyPoints(): HasOne
     {
         return $this->hasOne(LoyaltyPoints::class, 'customer_id');
+    }
+
+    /**
+     * Push-notification device tokens registered from the mobile app.
+     */
+    public function deviceTokens(): HasMany
+    {
+        return $this->hasMany(DeviceToken::class);
     }
 }
