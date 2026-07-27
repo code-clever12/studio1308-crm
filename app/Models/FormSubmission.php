@@ -30,6 +30,7 @@ class FormSubmission extends Model
         'value',
         'status',
         'capture_status',
+        'service',
         'submission_time',
     ];
 

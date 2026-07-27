@@ -133,9 +133,9 @@ it('filters all-submissions by form', function () {
         ->and($ids)->not->toContain($submissionB->id);
 });
 
-it('filters all-submissions by the service payload field', function () {
-    $lashes = FormSubmission::factory()->create(['payload' => ['service' => 'lashes']]);
-    $hair = FormSubmission::factory()->create(['payload' => ['service' => 'hair']]);
+it('filters all-submissions by the service column', function () {
+    $lashes = FormSubmission::factory()->create(['service' => 'lashes']);
+    $hair = FormSubmission::factory()->create(['service' => 'hair']);
 
     $response = $this->actingAs($this->admin)
         ->get(route('admin.form-submissions.all', ['service' => 'lashes']));
@@ -163,4 +163,21 @@ it('blocks a non-admin from viewing all submissions', function () {
     $customer = User::factory()->create(['role' => 'customer']);
 
     $this->actingAs($customer)->get(route('admin.form-submissions.all'))->assertForbidden();
+});
+
+it('paginates all-submissions at 20 per page', function () {
+    FormSubmission::factory()->count(25)->create();
+
+    $response = $this->actingAs($this->admin)->get(route('admin.form-submissions.all'));
+
+    $submissions = $response->viewData('submissions');
+    expect($submissions)->toHaveCount(20)
+        ->and($submissions->total())->toBe(25)
+        ->and($submissions->lastPage())->toBe(2);
+
+    $page2 = $this->actingAs($this->admin)
+        ->get(route('admin.form-submissions.all', ['page' => 2]))
+        ->viewData('submissions');
+
+    expect($page2)->toHaveCount(5);
 });

@@ -63,6 +63,11 @@ class FormSubmissionController extends Controller
             'utm_parameters' => $utmParameters ?: null,
             'value' => $request->input('value'),
             'capture_status' => $isPartial ? 'abandoned' : 'completed',
+            // Also kept in payload (not excluded via META_KEYS) so it still
+            // shows in the dynamic payload columns — this column exists
+            // purely so admin can filter by it with a plain where(), not a
+            // payload->service JSON path query.
+            'service' => $request->input('service'),
             'submission_time' => now(),
         ]);
 

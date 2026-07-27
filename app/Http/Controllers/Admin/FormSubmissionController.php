@@ -39,31 +39,23 @@ class FormSubmissionController extends Controller
         }
 
         if ($request->filled('service')) {
-            $query->where('payload->service', $request->string('service')->toString());
+            $query->where('service', $request->string('service')->toString());
         }
 
         if ($request->filled('capture_status')) {
             $query->where('capture_status', $request->string('capture_status')->toString());
         }
 
-        $submissions = $query->get();
-
-        // Services list is drawn from ALL submissions (not the filtered set)
-        // so the dropdown always offers every option, even ones the current
-        // filter has narrowed out of the visible table.
-        $services = FormSubmission::query()
-            ->get()
-            ->map(fn (FormSubmission $s) => $s->payload['service'] ?? null)
-            ->filter()
-            ->unique()
-            ->sort()
-            ->values();
+        $submissions = $query->paginate(20)->withQueryString();
 
         return view('admin.form-submissions.all', [
             'submissions' => $submissions,
             'payloadKeys' => $submissions->flatMap(fn (FormSubmission $s) => array_keys($s->payload ?? []))->unique()->values(),
             'forms' => Form::orderBy('name')->get(),
-            'services' => $services,
+            // Now a plain column query instead of scanning every payload's
+            // JSON for a 'service' key — simpler and faster now that
+            // Api\FormSubmissionController::store() writes it as a real column.
+            'services' => FormSubmission::query()->whereNotNull('service')->distinct()->orderBy('service')->pluck('service'),
             'selectedFormId' => $request->integer('form_id') ?: null,
             'selectedService' => $request->string('service')->toString() ?: null,
             'selectedCaptureStatus' => $request->string('capture_status')->toString() ?: null,

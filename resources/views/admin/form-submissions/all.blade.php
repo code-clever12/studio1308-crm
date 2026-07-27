@@ -130,4 +130,8 @@
             </tbody>
         </table>
     </div>
+
+    <div class="mt-4">
+        {{ $submissions->links() }}
+    </div>
 </x-admin-layout>
