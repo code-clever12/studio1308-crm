@@ -77,6 +77,23 @@ it('updates a submission', function () {
         ->and($submission->status)->toBe('hot_lead');
 });
 
+it('never changes submission_time when the lead is edited', function () {
+    // Regression guard: MySQL silently attached ON UPDATE CURRENT_TIMESTAMP
+    // to this column (a legacy TIMESTAMP quirk) until the column was
+    // switched to DATETIME — see the 2026_07_28_000000 migration. SQLite
+    // (used here) never had this quirk, so this test can't reproduce the
+    // original bug, but it does lock in the invariant going forward.
+    Sanctum::actingAs($this->admin);
+    $originalTime = now()->subDays(5)->startOfSecond();
+    $submission = FormSubmission::factory()->create(['submission_time' => $originalTime]);
+
+    $this->putJson(route('api.v1.submissions.update', $submission), [
+        'status' => 'hot_lead',
+    ])->assertOk();
+
+    expect($submission->fresh()->submission_time->equalTo($originalTime))->toBeTrue();
+});
+
 it('updates just the status', function () {
     Sanctum::actingAs($this->admin);
     $submission = FormSubmission::factory()->create(['status' => 'cold_lead']);
