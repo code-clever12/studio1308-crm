@@ -18,12 +18,47 @@ use App\Http\Controllers\Customer\ReviewController;
 use App\Http\Controllers\Customer\TipController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
+use App\Models\Category;
+use App\Models\Review;
 use App\Models\Salon;
+use App\Models\Staff;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome', ['salon' => Salon::query()->first()]);
+    // Categories with no active services are dropped rather than shown
+    // empty — a fresh install with only a couple of seeded services
+    // shouldn't display a wall of "no services yet" category headers.
+    $categories = Category::query()
+        ->orderBy('display_order')
+        ->with(['services' => fn ($query) => $query->where('is_active', true)->orderBy('display_order')])
+        ->get()
+        ->filter(fn (Category $category) => $category->services->isNotEmpty())
+        ->values();
+
+    $team = Staff::query()
+        ->with('user')
+        ->where('status', 'active')
+        ->withAvg('reviews', 'rating')
+        ->take(4)
+        ->get();
+
+    $reviews = Review::query()
+        ->with('customer')
+        ->whereNotNull('comment')
+        ->where('rating', '>=', 4)
+        ->latest()
+        ->take(3)
+        ->get();
+
+    return view('welcome', [
+        'salon' => Salon::query()->first(),
+        'categories' => $categories,
+        'team' => $team,
+        'reviews' => $reviews,
+        'averageRating' => Review::query()->avg('rating'),
+        'reviewCount' => Review::query()->count(),
+    ]);
 })->name('welcome');
 
 Route::get('/dashboard', function (Request $request) {
