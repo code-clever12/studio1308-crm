@@ -156,6 +156,7 @@ Route::middleware(['auth', 'verified', 'role:admin', 'throttle:60,1'])->prefix('
     Route::resource('forms', FormBuilderController::class)->except(['show']);
     Route::get('/forms/{form}/responses', [FormBuilderController::class, 'responses'])->name('forms.responses');
 
+    Route::get('/chat-leads', [FormSubmissionController::class, 'chatLeads'])->name('chat-leads.index');
     Route::get('/form-submissions', [FormSubmissionController::class, 'index'])->name('form-submissions.index');
     Route::get('/submissions', [FormSubmissionController::class, 'all'])->name('form-submissions.all');
     Route::get('/form-submissions/{form}', [FormSubmissionController::class, 'show'])->name('form-submissions.show');

@@ -62,6 +62,16 @@ class FormSubmissionController extends Controller
         ]);
     }
 
+    public function chatLeads(): View
+    {
+        $submissions = FormSubmission::with('form')->latest('submission_time')->paginate(20);
+
+        return view('admin.form-submissions.chat-leads', [
+            'submissions' => $submissions,
+            'payloadKeys' => $submissions->flatMap(fn (FormSubmission $s) => array_keys($s->payload ?? []))->unique()->values(),
+        ]);
+    }
+
     public function show(Form $form): View
     {
         $submissions = $form->submissions()->latest('submission_time')->get();

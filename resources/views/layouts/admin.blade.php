@@ -43,6 +43,8 @@
                     <p class="px-3 pt-4 pb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Business') }}</p>
                     <x-admin-nav-link route="admin.payouts.index">{{ __('Payouts') }}</x-admin-nav-link>
                     <x-admin-nav-link route="admin.settings.edit">{{ __('Settings') }}</x-admin-nav-link> -->
+
+                    <x-admin-nav-link route="admin.chat-leads.index" active="admin.chat-leads.*">{{ __('Chat Leads') }}</x-admin-nav-link>
                 </nav>
             </aside>
 
