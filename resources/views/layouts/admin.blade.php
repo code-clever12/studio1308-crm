@@ -26,7 +26,7 @@
                 </div>
 
                 <nav class="px-3 py-4 space-y-1">
-                    <x-admin-nav-link route="admin.dashboard">{{ __('Dashboard') }}</x-admin-nav-link>
+                    <!-- <x-admin-nav-link route="admin.dashboard">{{ __('Dashboard') }}</x-admin-nav-link>
                     <x-admin-nav-link route="admin.appointments.index" active="admin.appointments.*">{{ __('Appointments') }}</x-admin-nav-link>
                     <x-admin-nav-link route="admin.staff.index" active="admin.staff.*">{{ __('Staff') }}</x-admin-nav-link>
                     <x-admin-nav-link route="admin.services.index" active="admin.services.*">{{ __('Services') }}</x-admin-nav-link>
@@ -42,7 +42,7 @@
 
                     <p class="px-3 pt-4 pb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Business') }}</p>
                     <x-admin-nav-link route="admin.payouts.index">{{ __('Payouts') }}</x-admin-nav-link>
-                    <x-admin-nav-link route="admin.settings.edit">{{ __('Settings') }}</x-admin-nav-link>
+                    <x-admin-nav-link route="admin.settings.edit">{{ __('Settings') }}</x-admin-nav-link> -->
                 </nav>
             </aside>
 
