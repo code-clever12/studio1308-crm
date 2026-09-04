@@ -28,7 +28,7 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        $homeRoute = $request->user()->isAdmin() ? 'admin.dashboard' : 'dashboard';
+        $homeRoute = $request->user()->isAdmin() ? 'admin.chat-leads.index' : 'dashboard';
 
         return redirect()->intended(route($homeRoute, absolute: false));
     }
